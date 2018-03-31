@@ -1,0 +1,59 @@
+# Data to test, in groupvars
+---
+- paths:
+	ssh: config: ".ssh/config"
+	projects_root: "~/projects/"
+	vagrant_root: "~/projects/vagrant/"
+	playbook_root: "~/projects/playbooks/"
+	inventory_root: "~/projects/inventory/"
+	bootstrap: "~/projects/playbooks/linux/bootstrap.yml"
+
+- centos7:
+		box: "centos/7"
+		box_url: "https://vagrantcloud.com/centos/boxes/7/versions/1708.01providers/virtualbox.box"
+
+- other:
+    domain: "test.local"
+    dns: "8.8.8.8"
+
+- hosts:
+	- splunk: 
+		group: nnm
+		inventory_hostname: splunk
+		ansible_ssh_host: "192.168.33.10"
+		ansible_ssh_port: "2000"
+		vagrant_nake: splunk
+		vagrant_provoder: virtualbox
+
+		vagrant_mem: "512"
+		vagrant_cpu: "1"
+		vagarnt_box: "centos/7"
+		vagrant_box: "https://vagrantcloud.com/centos/boxes/7/versions/1708.01providers/virtualbox.box"
+
+	- icinga2: 
+		group: nnm
+		inventory_hostname: icinga2
+		ansible_ssh_host: 192.168.33.11
+		ansible_ssh_port: 2001
+		vagrant_nake: icinga2
+		vagrant_provoder: virtualbox
+		vagrant_domain: "test.local"
+		vagrant_dns: "8.8.8.8"
+		vagrant_mem: 512
+		vagrant_cpu: 1
+		vagarnt_box: "centos/7"
+		vagrant_box: "https://vagrantcloud.com/centos/boxes/7/versions/1708.01providers/virtualbox.box"
+	
+	- gitlab: 
+		group: nnm
+		inventory_hostname: gitlab
+		ansible_ssh_host: 192.168.33.12
+		ansible_ssh_port: 2003
+		vagrant_nake: splunk
+		vagrant_provoder: virtualbox
+		vagrant_domain: "test.local"
+		vagrant_dns: "8.8.8.8"
+		vagrant_mem: 512
+		vagrant_cpu: 1
+		vagarnt_box: "centos/7"
+		vagrant_box: "https://vagrantcloud.com/centos/boxes/7/versions/1708.01providers/virtualbox.box"

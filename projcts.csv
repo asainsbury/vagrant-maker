@@ -1,6 +1,0 @@
-# [ANSIBLE SPECIFIC]
-# group;inventory_hostname;ansible_ssh_host;vagrant_ssh_port;
-
-# [VAGRANT SPECIFIC]
-# name;provider;group;ip;vm_name;domain;DNS;mem;cpus;box;box_url
-nnm;splunk;192.168.33.10;2000;splunk;virtualbox;"test.local";"8.8.8.8";512;1;"centos/7";"https://vagrantcloud.com/centos/boxes/7/versions/1708.01/providers/virtualbox.box";
