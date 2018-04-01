@@ -1,0 +1,110 @@
+# Data to test, in groupvars
+---
+# Common vars
+ssh_config: ".ssh/config"
+projects_root: "~/projects/"
+vagrant_root: "~/projects/vagrant/"
+playbook_root: "~/projects/playbooks/"
+inventory_root: "~/projects/inventory/"
+bootstrap: "~/projects/playbooks/linux/bootstrap.yml"
+
+# Other varables
+domain: "test.local"
+primary: "8.8.8.8"
+secondary: "8.8.4.4"
+
+# Box specific vars
+# Dict of dicts in case we want to build out more data
+centos7:
+  box: "centos/7"
+
+cisco_1000:
+  box: "cisco/csr1000v"
+
+cisco_9000:
+  box: "n9000v"
+
+# Host vars - but not in hostvars
+hosts:
+  splunk: 
+    group: "nnm"
+    inventory_hostname: "splunk"
+    ansible_ssh_host: "192.168.33.10"
+    ansible_ssh_port: "2000"
+    vagrant_provoder: virtualbox
+    vagrant_mem: "512"
+    vagrant_cpu: "1"
+    vagrant_box: "{{centos7['box']}}"
+    type: "linux"
+
+  icinga2: 
+    group: "nnm"
+    inventory_hostname: icinga2
+    ansible_ssh_host: "192.168.33.11"
+    ansible_ssh_port: "2001"
+    vagrant_provoder: virtualbox
+    vagrant_mem: "512"
+    vagrant_cpu: "1"
+    vagrant_box: "{{centos7['box']}}"
+    type: "linux"
+
+  gitlab: 
+    group: "nnm"
+    inventory_hostname: "gitlab"
+    ansible_ssh_host: "192.168.33.12"
+    ansible_ssh_port: "2002"
+    vagrant_provoder: "virtualbox"
+    vagrant_mem: "512"
+    vagrant_cpu: "1"
+    vagrant_box: "{{centos7['box']}}"
+    type: "linux"
+
+  csr1:
+    group: "1000v"
+    inventory_hostname: "csr1"
+    ansible_ssh_host: "192.168.33.13"
+    ansible_ssh_port: "2003"
+    cisco_api_port: "4003"
+    vagrant_provoder: "virtualbox"
+    vagrant_mem: "4096"
+    vagrant_cpu: "2"
+    vagrant_box: "{{cisco_9000['box']}}"
+    type: "cisco"
+
+  csr2:
+    group: "1000v"
+    inventory_hostname: "csr2"
+    ansible_ssh_host: "192.168.33.14"
+    ansible_ssh_port: "2004"
+    cisco_api_port: "4004"
+    vagrant_provoder: "virtualbox"
+    vagrant_mem: "4096"
+    vagrant_cpu: "2"
+    vagrant_box: "{{cisco_9000['box']}}"
+    type: "cisco"
+    
+  9kv1:
+    group: "9kv"
+    inventory_hostname: "9kv1"
+    ansible_ssh_host: "192.168.33.15"
+    ansible_ssh_port: "2005"
+    cisco_api_port: "4005"
+    vagrant_provoder: "virtualbox"
+    vagrant_mem: "4096"
+    vagrant_cpu: "2"
+    vagrant_box: "{{cisco_9000['box']}}"
+    type: "cisco"
+
+  9kv2:
+    group: "9kv"
+    inventory_hostname: "9kv2"
+    ansible_ssh_host: "192.168.33.16"
+    ansible_ssh_port: "2006"
+    cisco_api_port: "4006"
+    vagrant_provoder: "virtualbox"
+    vagrant_mem: "4096"
+    vagrant_cpu: "2"
+    vagrant_box: "{{cisco_9000['box']}}"
+    type: "cisco"
+
+

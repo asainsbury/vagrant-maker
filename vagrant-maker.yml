@@ -1,0 +1,19 @@
+---
+- hosts: localhost
+  gather_facts: false
+
+# Printing parts of the group vars works fine
+# now onto building out the playbook
+# Basically generate:
+  # make some paths exist
+  # gen ssh config
+  # gen yaml hosts file
+  # gen inventory file
+  # move files around
+
+
+  tasks:
+    - name: Print the tests 
+      debug:
+        var: hosts
+ 
