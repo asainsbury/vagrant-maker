@@ -85,6 +85,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         end
       end
   
+      # Start the building of the box
       node.vm.provider host['provider'] do |vb|
         vb.name = host['name']
         vb.memory = host['mem']
