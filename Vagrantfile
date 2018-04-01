@@ -6,14 +6,18 @@
 # http://hakunin.com/six-ansible-practices
 # https://stackoverflow.com/questions/16708917/how-do-i-include-variables-in-my-vagrantfile
 
-require 'yaml'
-
+# Some standard stuff:
 VAGRANTFILE_API_VERSION = '2'
-PROJECT_NAME = '/' + File.basename(Dir.getwd)
 
+# Bit of error checking around the external data source:
+require 'yaml'
+if File.file?('hosts.yaml')
+  hosts = YAML.load_file('hosts.yml')
+else
+  raise "Configuration file 'config.yaml' does not exist."
+end
 
-hosts = YAML.load_file('hosts.yml')
-
+# Small function to define the network side of things:
 def network_options(host)
   options = {}
 
@@ -39,7 +43,7 @@ def network_options(host)
   options
 end
 
-
+# Then start the config:
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   hosts.each do |host|
     config.vm.define host['name'] do |node|
@@ -62,12 +66,12 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         node.vm.network "forwarded_port", guest: 443, host: host['cisco_api_port'], auto_correct: true
         
         # node.vm.network "private_network", auto_config: false, virtualbox__intnet: "vboxnet0", mac: "0800276CEE16"
-        node.vm.network "private_network", auto_config: false, virtualbox__intnet: "nxosv_network2", mac: "0800276CEE15"
-        node.vm.network "private_network", auto_config: false, virtualbox__intnet: "nxosv_network3", mac: "0800276CEE14"
-        node.vm.network "private_network", auto_config: false, virtualbox__intnet: "nxosv_network4", mac: "0800276CEE13"
-        node.vm.network "private_network", auto_config: false, virtualbox__intnet: "nxosv_network5", mac: "0800276CEE12"
-        node.vm.network "private_network", auto_config: false, virtualbox__intnet: "nxosv_network6", mac: "0800276CEE10"
-        node.vm.network "private_network", auto_config: false, virtualbox__intnet: "nxosv_network7", mac: "0800276CEE09"
+        node.vm.network "private_network", auto_config: false, virtualbox__intnet: "cisco_network2", mac: "0800276CEE15"
+        node.vm.network "private_network", auto_config: false, virtualbox__intnet: "cisco_network3", mac: "0800276CEE14"
+        node.vm.network "private_network", auto_config: false, virtualbox__intnet: "cisco_network4", mac: "0800276CEE13"
+        node.vm.network "private_network", auto_config: false, virtualbox__intnet: "cisco_network5", mac: "0800276CEE12"
+        node.vm.network "private_network", auto_config: false, virtualbox__intnet: "cisco_network6", mac: "0800276CEE10"
+        node.vm.network "private_network", auto_config: false, virtualbox__intnet: "cisco_network7", mac: "0800276CEE09"
         
         node.vm.provider :virtualbox do |vb|  
           vb.gui = true 
@@ -89,8 +93,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       end
 
       # If we supplied a bootstrap variable in the data, then execute
-      # 
-      if host['bootstrap']
+      # Ignore cisco, for now, only run on a linux host
+      if host['type'] == "linux"
         node.vm.provision "ansible" do |ansible|
           ansible.version = "2.4.0.0"
           ansible.compatibility_mode = "auto"
