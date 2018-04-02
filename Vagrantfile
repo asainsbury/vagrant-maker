@@ -6,18 +6,19 @@
 # http://hakunin.com/six-ansible-practices
 # https://stackoverflow.com/questions/16708917/how-do-i-include-variables-in-my-vagrantfile
 
-# Some standard stuff:
-VAGRANTFILE_API_VERSION = '2'
 
+VAGRANTFILE_API_VERSION = '2'
 # Bit of error checking around the external data source:
 require 'yaml'
-if File.file?('hosts.yaml')
-  hosts = YAML.load_file('hosts.yml')
+if File.file?('hosts.yml')
+  data = YAML.load_file('hosts.yml')
 else
-  raise "Configuration file 'config.yaml' does not exist."
+  raise "Configuration file 'hosts.yml' does not exist."
 end
 
-# Small function to define the network side of things:
+
+# Define a nice function to sor out all the networking
+# Gets called in the main section
 def network_options(host)
   options = {}
 
@@ -43,23 +44,28 @@ def network_options(host)
   options
 end
 
-# Then start the config:
+# As the data is sourced from a hash via group_vars we need to reference the key
+# Which is 'list' but the group thing is broken.
+# Only seems to work when you grab the folder name?
+
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
-  hosts.each do |host|
+  data['list'].each do |host|
     config.vm.define host['name'] do |node|
-
-      if Vagrant.has_plugin?("vagrant-cachier")
-        config.cache.disable!
-      end
-
+      # PROJECT_NAME = '/' + host['group']
       node.vm.box = host['box']
       node.vm.box_url = host['box_url']
       node.vm.hostname = host['name']
       node.vm.network :private_network, network_options(host)
       node.ssh.insert_key = true
       node.vm.boot_timeout = 180
-      node.vm.synced_folder '.', '/vagrant', disabled: true
 
+      node.vm.provider host['provider'] do |vb|
+        vb.name = host['name']
+        vb.memory = host['mem']
+        vb.cpus = host['cpus']
+        # vb.customize ['modifyvm', :id, '--groups', PROJECT_NAME]
+      end
+      
       if host['type'] == "cisco"
         # do the extra interfaces here, work with the group vars
         node.vm.network "forwarded_port", guest: 22, host: host['ansible_ssh_port'], auto_correct: true, id: "ssh"
@@ -84,20 +90,12 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
           vb.customize ['modifyvm',:id,'--nicpromisc8','allow-all']
         end
       end
-  
-      # Start the building of the box
-      node.vm.provider host['provider'] do |vb|
-        vb.name = host['name']
-        vb.memory = host['mem']
-        vb.cpus = host['cpus']
-        vb.customize ['modifyvm', :id, '--groups', host['group']]
-      end
-
+      
       # If we supplied a bootstrap variable in the data, then execute
       # Ignore cisco, for now, only run on a linux host
       if host['type'] == "linux"
         node.vm.provision "ansible" do |ansible|
-          ansible.version = "2.4.0.0"
+          ansible.version = "2.4.2.0"
           ansible.compatibility_mode = "auto"
           ansible.playbook = host['bootstrap']
         end

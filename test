@@ -1,0 +1,22 @@
+#!/usr/local/bin/ruby
+require 'yaml'
+require 'pp'
+
+config_options = YAML.load_file('data.yml')
+# @list = config_options['hosts']
+
+pp config_options
+# pp @list
+
+
+# config_options.each do |key, value|
+#     puts "line #{key} is #{value}\n"
+# end
+
+
+# require 'yaml'
+# if File.file?('data.yml')
+#   hosts = YAML.load_file('data.yml')
+# else
+#   raise "Configuration file 'data.yml' does not exist."
+# end
