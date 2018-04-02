@@ -1,12 +1,13 @@
 # Data to test, in groupvars
 ---
-# Common vars
+# Common vars just calling out all the things I can think of:
+ssh_user: "andy"
 ssh_config: ".ssh/config"
 projects_root: "~/projects/"
 vagrant_root: "~/projects/vagrant/"
 playbook_root: "~/projects/playbooks/"
 inventory_root: "~/projects/inventory/"
-bootstrap: "~/projects/playbooks/linux/bootstrap.yml"
+bootstrap: "bootstrap.yml"
 
 # Other varables
 domain: "test.local"
@@ -39,7 +40,7 @@ host_list:
     cpus: 1
     box: 'centos/7'
     box_url: 'https://vagrantcloud.com/centos/boxes/7/versions/1708.01/providers/virtualbox.box'
-    bootstrap: '/Users/andy/projects/playbooks/linux/bootstrap.yml'
+    bootstrap: 'bootstrap.yml'
     type: "linux"
 
   - name: splunk2
@@ -51,7 +52,7 @@ host_list:
     cpus: 1
     box: 'centos/7'
     box_url: 'https://vagrantcloud.com/centos/boxes/7/versions/1708.01/providers/virtualbox.box'
-    bootstrap: '/Users/andy/projects/playbooks/linux/bootstrap.yml'
+    bootstrap: 'bootstrap.yml'
     type: "linux"
 
 # modify later, with the above format, as this is working

@@ -1,0 +1,52 @@
+---
+- hosts: all
+  gather_facts: yes
+  become: true
+
+  tasks:
+    - name: Create User
+      user:
+        name: "{{ssh_user}}"
+        password: Password@1
+        shell: /bin/bash
+        append: yes
+        generate_ssh_key: yes
+        ssh_key_bits: 1024
+        ssh_key_file: .ssh/id_rsa
+
+    - name: Set authorized key from file
+      authorized_key:
+        user: "{{ssh_user}}"
+        state: present
+        key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+
+    - name: Add andy to sudoers
+      lineinfile: dest=/etc/sudoers
+                  regexp="{{ssh_user}}"
+                  line='"{{ssh_user}}"  ALL=(ALL) NOPASSWD:ALL'
+                  state=present
+
+    - name: Disallow password authentication
+      lineinfile: dest=/etc/ssh/sshd_config
+                  regexp="^PasswordAuthentication"
+                  line="PasswordAuthentication no"
+                  state=present
+      #validate: 'visudo -cf %s'
+      notify: restart_ssh
+
+    - name: Disallow root SSH access
+      lineinfile: dest=/etc/ssh/sshd_config
+                  regexp="^PermitRootLogin"
+                  line="PermitRootLogin no"
+                  state=present
+      notify: restart_ssh
+
+    - name: Turn off selinux, needs a reboot
+      selinux:
+        state: disabled
+   
+  handlers:
+    - name: restart_ssh
+      systemd:
+        name: sshd
+        state: restarted
