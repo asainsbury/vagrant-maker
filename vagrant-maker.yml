@@ -15,5 +15,5 @@
   tasks:
     - name: Print the tests 
       debug:
-        var: hosts
+        var: host_list
  

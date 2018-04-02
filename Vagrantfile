@@ -10,10 +10,10 @@
 VAGRANTFILE_API_VERSION = '2'
 # Bit of error checking around the external data source:
 require 'yaml'
-if File.file?('hosts.yml')
-  data = YAML.load_file('hosts.yml')
+if File.file?('group_vars/all.yml')
+  data = YAML.load_file('group_vars/all.yml')
 else
-  raise "Configuration file 'hosts.yml' does not exist."
+  raise "Configuration file does not exist."
 end
 
 
@@ -49,9 +49,11 @@ end
 # Only seems to work when you grab the folder name?
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
-  data['list'].each do |host|
+  data['host_list'].each do |host|
+    
+    grab_group = '/' + host['group']
+
     config.vm.define host['name'] do |node|
-      # PROJECT_NAME = '/' + host['group']
       node.vm.box = host['box']
       node.vm.box_url = host['box_url']
       node.vm.hostname = host['name']
@@ -63,7 +65,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         vb.name = host['name']
         vb.memory = host['mem']
         vb.cpus = host['cpus']
-        # vb.customize ['modifyvm', :id, '--groups', PROJECT_NAME]
+        vb.customize ['modifyvm', :id, '--groups', grab_group]
       end
       
       if host['type'] == "cisco"

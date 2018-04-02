@@ -17,6 +17,7 @@ secondary: "8.8.4.4"
 # Dict of dicts in case we want to build out more data
 centos7:
   box: "centos/7"
+  box_url: 'https://vagrantcloud.com/centos/boxes/7/versions/1708.01/providers/virtualbox.box'
 
 cisco_1000:
   box: "cisco/csr1000v"
@@ -25,26 +26,54 @@ cisco_9000:
   box: "n9000v"
 
 # Host vars - but not in hostvars
-hosts:
-  - inventory_hostname: "splunk1"
-    group: "nnm"
-    ansible_ssh_host: "192.168.33.10"
-    ansible_ssh_port: "2000"
-    vagrant_provoder: "virtualbox"
-    vagrant_mem: "512"
-    vagrant_cpu: "1"
-    vagrant_box: "{{centos7['box']}}"
+# This format works!!
+# Vagrant reads in the dict of list, but it doesn't know about the other vars
+# so for now you have to fully specify the box data, no shortcuts.
+host_list:
+  - name: splunk1
+    provider: virtualbox
+    group: monitoring
+    ip: 1.1.1.10
+    vm_name: splunk1
+    mem: 512
+    cpus: 1
+    box: 'centos/7'
+    box_url: 'https://vagrantcloud.com/centos/boxes/7/versions/1708.01/providers/virtualbox.box'
+    bootstrap: '/Users/andy/projects/playbooks/linux/bootstrap.yml'
     type: "linux"
 
-  - inventory_hostname: "icinga2"
-    group: "nnm"  
-    ansible_ssh_host: "192.168.33.11"
-    ansible_ssh_port: "2001"
-    vagrant_provoder: "virtualbox"
-    vagrant_mem: "512"
-    vagrant_cpu: "1"
-    vagrant_box: "{{centos7['box']}}"
+  - name: splunk2
+    provider: virtualbox
+    group: monitoring
+    ip: 1.1.1.11
+    vm_name: splunk1
+    mem: 512
+    cpus: 1
+    box: 'centos/7'
+    box_url: 'https://vagrantcloud.com/centos/boxes/7/versions/1708.01/providers/virtualbox.box'
+    bootstrap: '/Users/andy/projects/playbooks/linux/bootstrap.yml'
     type: "linux"
+
+# modify later, with the above format, as this is working
+#   - inventory_hostname: "splunk1"
+#     group: "nnm"
+#     ansible_ssh_host: "192.168.33.10"
+#     ansible_ssh_port: "2000"
+#     vagrant_provoder: "virtualbox"
+#     vagrant_mem: "512"
+#     vagrant_cpu: "1"
+#     vagrant_box: "{{centos7['box']}}"
+#     type: "linux"
+
+#   - inventory_hostname: "icinga2"
+#     group: "nnm"  
+#     ansible_ssh_host: "192.168.33.11"
+#     ansible_ssh_port: "2001"
+#     vagrant_provoder: "virtualbox"
+#     vagrant_mem: "512"
+#     vagrant_cpu: "1"
+#     vagrant_box: "{{centos7['box']}}"
+#     type: "linux"
 
   # gitlab: 
   #   group: "nnm"
