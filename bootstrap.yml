@@ -20,7 +20,7 @@
         state: present
         key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
 
-    - name: Add andy to sudoers
+    - name: Add user to sudoers
       lineinfile: dest=/etc/sudoers
                   regexp="{{ssh_user}}"
                   line='"{{ssh_user}}"  ALL=(ALL) NOPASSWD:ALL'
@@ -31,7 +31,6 @@
                   regexp="^PasswordAuthentication"
                   line="PasswordAuthentication no"
                   state=present
-      #validate: 'visudo -cf %s'
       notify: restart_ssh
 
     - name: Disallow root SSH access

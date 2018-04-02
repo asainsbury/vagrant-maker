@@ -51,7 +51,7 @@ end
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   data['host_list'].each do |host|
     
-    grab_group = '/' + host['group']
+    set_group = '/' + host['group']
 
     config.vm.define host['name'] do |node|
       node.vm.box = host['box']
@@ -65,7 +65,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         vb.name = host['name']
         vb.memory = host['mem']
         vb.cpus = host['cpus']
-        vb.customize ['modifyvm', :id, '--groups', grab_group]
+        vb.customize ['modifyvm', :id, '--groups', set_group]
       end
       
       if host['type'] == "cisco"
