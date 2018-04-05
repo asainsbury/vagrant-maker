@@ -6,7 +6,7 @@ ssh_config: "~/.ssh/config"
 projects_root: "~/projects/"
 vagrant_root: "~/projects/vagrant/"
 playbook_root: "~/projects/playbooks/"
-inventory_root: "~/projects/inventory/"
+host_file: "~/projects/inventory/hosts"
 
 # These vars get called by the vagrant file
 # The file ingests all this data
@@ -37,9 +37,10 @@ cisco_9000:
   box: "n9000v"
 
 # Host vars - but not in hostvars
-# This format works!!
+# This format works great!!
 # Vagrant reads in the dict of list, but it doesn't know about the other vars
 # so for now you have to fully specify the box data, no shortcuts.
+# probably can do this inside of the vagrant file, as we suck all that info in
 host_list:
   - name: splunk1
     provider: virtualbox

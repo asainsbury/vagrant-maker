@@ -17,7 +17,7 @@
       blockinfile:
         path: "{{ssh_config}}"
         marker: "# {mark} ANSIBLE MANAGED BLOCK {{ item.name }}"
-
+         
         block: | 
           Host {{item.name}} *.test.local
             hostname {{item.ip}}
@@ -25,5 +25,16 @@
             UserKnownHostsFile=/dev/null
             User {{ssh_user}}
             LogLevel ERROR  
+        
+        state: "{{item.state}}"
+
+      with_items:
+        - "{{host_list}}"
+
+    - name: Add hosts to inventory
+      lineinfile:
+        path: "{{host_file}}"
+        line: "{{item.name}} ansible_ssh_host={{item.ip}}"
+        state: "{{item.state}}"
       with_items:
         - "{{host_list}}"
