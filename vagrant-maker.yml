@@ -1,12 +1,11 @@
 ---
 - hosts: localhost
-  gather_facts: true
+  gather_facts: false
+  # All data is sourced from group_vars/all.yml
 
-# Printing parts of the group vars works fine
-# now onto building out the playbook
-# Basically generate:
-  # gen ssh config
-  # gen inventory file
+  # Basically generate, with a state:
+  #   ssh config
+  #   inventory file
 
   tasks:
     - name: Print the tests 
