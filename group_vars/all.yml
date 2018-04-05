@@ -2,12 +2,18 @@
 ---
 # Common vars just calling out all the things I can think of:
 ssh_user: "andy"
-ssh_config: ".ssh/config"
+ssh_config: "~/.ssh/config"
 projects_root: "~/projects/"
 vagrant_root: "~/projects/vagrant/"
 playbook_root: "~/projects/playbooks/"
 inventory_root: "~/projects/inventory/"
+
+# These vars get called by the vagrant file
+# The file ingests all this data
+# Ansible version is used during the bootstrap, might need to be autgenerated
+# as it will throw an error if testing with a python virtual env, hard coded for now
 bootstrap: "bootstrap.yml"
+ansible_vagrant: "2.4.2.0"
 
 # Other varables
 domain: "test.local"
@@ -18,7 +24,11 @@ secondary: "8.8.4.4"
 # Dict of dicts in case we want to build out more data
 centos7:
   box: "centos/7"
-  box_url: 'https://vagrantcloud.com/centos/boxes/7/versions/1708.01/providers/virtualbox.box'
+  box_url: 'https://vagrantcloud.com/centos/boxes/7'
+
+ubuntuTrusty:
+  box: "ubuntu/trusty64"
+  box_url: "https://app.vagrantup.com/ubuntu/boxes/trusty64"
 
 cisco_1000:
   box: "cisco/csr1000v"
@@ -39,100 +49,37 @@ host_list:
     mem: 512
     cpus: 1
     box: 'centos/7'
-    box_url: 'https://vagrantcloud.com/centos/boxes/7/versions/1708.01/providers/virtualbox.box'
+    box_url: 'https://vagrantcloud.com/centos/boxes/7'
     bootstrap: 'bootstrap.yml'
     type: "linux"
+    state: "present"
 
-  - name: splunk2
+  - name: dev
     provider: virtualbox
     group: monitoring
     ip: 1.1.1.11
-    vm_name: splunk1
+    vm_name: dev
     mem: 512
     cpus: 1
-    box: 'centos/7'
-    box_url: 'https://vagrantcloud.com/centos/boxes/7/versions/1708.01/providers/virtualbox.box'
+    box: 'ubuntu/trusty64'
+    box_url: 'https://vagrantcloud.com/ubuntu/trusty64'
     bootstrap: 'bootstrap.yml'
     type: "linux"
+    state: "present"
 
-# modify later, with the above format, as this is working
-#   - inventory_hostname: "splunk1"
-#     group: "nnm"
-#     ansible_ssh_host: "192.168.33.10"
-#     ansible_ssh_port: "2000"
-#     vagrant_provoder: "virtualbox"
-#     vagrant_mem: "512"
-#     vagrant_cpu: "1"
-#     vagrant_box: "{{centos7['box']}}"
-#     type: "linux"
 
-#   - inventory_hostname: "icinga2"
-#     group: "nnm"  
-#     ansible_ssh_host: "192.168.33.11"
-#     ansible_ssh_port: "2001"
-#     vagrant_provoder: "virtualbox"
-#     vagrant_mem: "512"
-#     vagrant_cpu: "1"
-#     vagrant_box: "{{centos7['box']}}"
-#     type: "linux"
-
-  # gitlab: 
-  #   group: "nnm"
-  #   inventory_hostname: "gitlab"
-  #   ansible_ssh_host: "192.168.33.12"
-  #   ansible_ssh_port: "2002"
-  #   vagrant_provoder: "virtualbox"
-  #   vagrant_mem: "512"
-  #   vagrant_cpu: "1"
-  #   vagrant_box: "{{centos7['box']}}"
+ # Templated data, as this format is working well: 
+  # - name: xxx
+  #   provider: virtualbox
+  #   group: monitoring
+  #   ip: 1.1.1.xx
+  #   vm_name: xx
+  #   mem: 512
+  #   cpus: 1
+  #   box: 'xxx'
+  #   box_url: 'xx'
+  #   bootstrap: 'bootstrap.yml'
   #   type: "linux"
-
-  # csr1:
-  #   group: "1000v"
-  #   inventory_hostname: "csr1"
-  #   ansible_ssh_host: "192.168.33.13"
-  #   ansible_ssh_port: "2003"
-  #   cisco_api_port: "4003"
-  #   vagrant_provoder: "virtualbox"
-  #   vagrant_mem: "4096"
-  #   vagrant_cpu: "2"
-  #   vagrant_box: "{{cisco_9000['box']}}"
-  #   type: "cisco"
-
-  # csr2:
-  #   group: "1000v"
-  #   inventory_hostname: "csr2"
-  #   ansible_ssh_host: "192.168.33.14"
-  #   ansible_ssh_port: "2004"
-  #   cisco_api_port: "4004"
-  #   vagrant_provoder: "virtualbox"
-  #   vagrant_mem: "4096"
-  #   vagrant_cpu: "2"
-  #   vagrant_box: "{{cisco_9000['box']}}"
-  #   type: "cisco"
-    
-  # 9kv1:
-  #   group: "9kv"
-  #   inventory_hostname: "9kv1"
-  #   ansible_ssh_host: "192.168.33.15"
-  #   ansible_ssh_port: "2005"
-  #   cisco_api_port: "4005"
-  #   vagrant_provoder: "virtualbox"
-  #   vagrant_mem: "4096"
-  #   vagrant_cpu: "2"
-  #   vagrant_box: "{{cisco_9000['box']}}"
-  #   type: "cisco"
-
-  # 9kv2:
-  #   group: "9kv"
-  #   inventory_hostname: "9kv2"
-  #   ansible_ssh_host: "192.168.33.16"
-  #   ansible_ssh_port: "2006"
-  #   cisco_api_port: "4006"
-  #   vagrant_provoder: "virtualbox"
-  #   vagrant_mem: "4096"
-  #   vagrant_cpu: "2"
-  #   vagrant_box: "{{cisco_9000['box']}}"
-  #   type: "cisco"
+  #   state: "present"
 
 

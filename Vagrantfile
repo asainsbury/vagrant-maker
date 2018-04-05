@@ -97,7 +97,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       # Ignore cisco, for now, only run on a linux host
       if host['type'] == "linux"
         node.vm.provision "ansible" do |ansible|
-          ansible.version = "2.4.2.0"
+          ansible.version = data['ansible_vagrant']
           ansible.compatibility_mode = "auto"
           ansible.playbook = host['bootstrap']
         end

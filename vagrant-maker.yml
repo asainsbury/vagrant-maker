@@ -1,19 +1,29 @@
 ---
 - hosts: localhost
-  gather_facts: false
+  gather_facts: true
 
 # Printing parts of the group vars works fine
 # now onto building out the playbook
 # Basically generate:
-  # make some paths exist
   # gen ssh config
-  # gen yaml hosts file
   # gen inventory file
-  # move files around
-
 
   tasks:
     - name: Print the tests 
       debug:
         var: host_list
- 
+
+    - name: Add hosts for vagrant into sshconfg
+      blockinfile:
+        path: "{{ssh_config}}"
+        marker: "# {mark} ANSIBLE MANAGED BLOCK {{ item.name }}"
+
+        block: | 
+          Host {{item.name}} *.test.local
+            hostname {{item.ip}}
+            StrictHostKeyChecking no
+            UserKnownHostsFile=/dev/null
+            User {{ssh_user}}
+            LogLevel ERROR  
+      with_items:
+        - "{{host_list}}"

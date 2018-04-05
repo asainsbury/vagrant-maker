@@ -2,6 +2,7 @@
 - hosts: all
   gather_facts: yes
   become: true
+  # do a os check, and only run the selinux with centos:
 
   tasks:
     - name: Create User
@@ -40,9 +41,10 @@
                   state=present
       notify: restart_ssh
 
-    - name: Turn off selinux, needs a reboot
+    - name: Turn off selinux, only on Centos or RHEL
       selinux:
         state: disabled
+      when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
    
   handlers:
     - name: restart_ssh
