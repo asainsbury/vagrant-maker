@@ -71,7 +71,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       if host['type'] == "cisco"
         # do the extra interfaces here, work with the group vars
         node.vm.network "forwarded_port", guest: 22, host: host['ansible_ssh_port'], auto_correct: true, id: "ssh"
-        node.vm.network "forwarded_port", guest: 443, host: host['cisco_api_port'], auto_correct: true
+        node.vm.network "forwarded_port", guest: 443, host: host['cisco_api_port'], auto_correct: true, id: "https"
         
         # node.vm.network "private_network", auto_config: false, virtualbox__intnet: "vboxnet0", mac: "0800276CEE16"
         node.vm.network "private_network", auto_config: false, virtualbox__intnet: "cisco_network2", mac: "0800276CEE15"
