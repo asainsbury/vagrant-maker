@@ -41,9 +41,13 @@
                   state=present
       notify: restart_ssh
 
+    #  Fails with centos6, 
+    # fatal: [centos6]: FAILED! => {"changed": false, "msg": "libselinux-python required for this module"}
+
     - name: Turn off selinux, only on Centos or RHEL
       selinux:
-        state: disabled
+        policy: targeted
+        state: permissive
       when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
    
   handlers:

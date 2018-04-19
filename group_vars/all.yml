@@ -42,9 +42,9 @@ cisco_9000:
 # so for now you have to fully specify the box data, no shortcuts.
 # probably can do this inside of the vagrant file, as we suck all that info in
 host_list:
-  - name: splunk1
+  - name: dev1
     provider: virtualbox
-    group: monitoring
+    group: dev
     ip: 1.1.1.10
     vm_name: splunk1
     mem: 512
@@ -55,19 +55,32 @@ host_list:
     type: "linux"
     state: "present"
 
-  - name: dev
+  - name: dev2
     provider: virtualbox
-    group: monitoring
+    group: dev
     ip: 1.1.1.11
     vm_name: dev
     mem: 512
     cpus: 1
-    box: 'ubuntu/trusty64'
-    box_url: 'https://vagrantcloud.com/ubuntu/trusty64'
+    box: 'centos/7'
+    box_url: 'https://vagrantcloud.com/centos/boxes/7'
     bootstrap: 'bootstrap.yml'
     type: "linux"
     state: "present"
 
+# Templated data, as this format is working well: 
+  # - name: centos6
+  #   provider: virtualbox
+  #   group: monitoring
+  #   ip: 1.1.1.12
+  #   vm_name: centos6
+  #   mem: 512
+  #   cpus: 1
+  #   box: 'centos/6'
+  #   box_url: 'https://vagrantcloud.com/centos/boxes/6'
+  #   bootstrap: 'bootstrap.yml'
+  #   type: "linux"
+  #   state: "absent"
 
  # Templated data, as this format is working well: 
   # - name: xxx
