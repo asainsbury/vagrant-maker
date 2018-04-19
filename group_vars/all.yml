@@ -12,13 +12,15 @@ host_file: "~/projects/inventory/hosts"
 # The file ingests all this data
 # Ansible version is used during the bootstrap, might need to be autgenerated
 # as it will throw an error if testing with a python virtual env, hard coded for now
-bootstrap: "bootstrap.yml"
+
 ansible_vagrant: "2.4.2.0"
 
+# Some of this information is redundant and isn't called by anything, thats just a warning.
 # Other varables
 domain: "test.local"
 primary: "8.8.8.8"
 secondary: "8.8.4.4"
+play: "vagrant-maker.yml"
 
 # Box specific vars
 # Dict of dicts in case we want to build out more data
@@ -41,6 +43,10 @@ cisco_9000:
 # Vagrant reads in the dict of list, but it doesn't know about the other vars
 # so for now you have to fully specify the box data, no shortcuts.
 # probably can do this inside of the vagrant file, as we suck all that info in
+
+# Bootstrap part passes the name into the play via vagrant, so you can't dedup that part
+# but is does mean you can call differnet bootstraps for different hosts
+
 host_list:
   - name: dev1
     provider: virtualbox
