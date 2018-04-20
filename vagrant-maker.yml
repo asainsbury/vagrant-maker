@@ -61,7 +61,7 @@
       become: true
       lineinfile:
         dest: /etc/hosts
-        line: "{{item.name}} ansible_host={{item.ip}}"
+        line: "{{item.ip}} {{item.name}}"
         state: present
       with_items: "{{ host_list }}"
 
