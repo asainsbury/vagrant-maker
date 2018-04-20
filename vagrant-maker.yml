@@ -14,6 +14,7 @@
 
   # Really want to get this to run each time you provison the VM
   # then you don't have to worry about creating stuff, it just runs
+  # Tested on 2.4 and 2.5
 
   tasks:
     - name: Print the tests 
@@ -51,7 +52,7 @@
         regexp: "{{item.group}}"
         line: "[{{item.group}}]"
         state: "{{item.state}}"
-        # firstmatch: yes 2.5 only
+        firstmatch: yes
       with_items: "{{ host_list }}"
       tags:
         - group

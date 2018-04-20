@@ -14,7 +14,7 @@ host_file: "~/projects/inventory/hosts"
 # Ansible version is used during the bootstrap, might need to be autgenerated
 # as it will throw an error if testing with a python virtual env, hard coded for now
 
-ansible_vagrant: "2.4.2.0"
+ansible_vagrant: "2.5.1"
 
 # Some of this information is redundant and isn't called by anything, thats just a warning.
 # Other varables
