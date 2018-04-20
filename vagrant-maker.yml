@@ -4,7 +4,7 @@
 
   vars:
     debug: "false"
-  
+
   # All data is sourced from group_vars/all.yml
 
   # Basically generate, with a state:
@@ -19,9 +19,7 @@
     - name: Print the tests 
       debug:
         var: host_list
-
       when: (debug == 'true')
-
       tags:
         - debug
 
@@ -46,23 +44,35 @@
       tags:
         - sshconfg
 
-    - name: Generate the inventory file
-      ini_file:
+    # This keeps adding an extra dev host..
+    - name: add group to inventory file
+      lineinfile:
         path: "{{host_file}}"
-        section: "{{item.group}}"
-        option: "{{item.name}} ansible_ssh_host"
-        value: "{{item.ip}}"
+        regexp: "{{item.group}}"
+        line: "[{{item.group}}]"
+        state: "{{item.state}}"
+        # firstmatch: yes 2.5 only
       with_items: "{{ host_list }}"
-
       tags:
-        - inventory
+        - group
+
+    - name: add host to inventory file
+      lineinfile:
+        path: "{{host_file}}"
+        regexp: "{{item.name}}"
+        line: "{{item.name}} ansible_ssh_host={{item.ip}}"
+        insertafter: "{{item.group}}"
+        state: "{{item.state}}"
+      with_items: "{{ host_list }}"
+      tags:
+        - inv
 
     - name: Add IP address of all hosts to all hosts needs -K on cli
       become: true
       lineinfile:
         dest: /etc/hosts
         line: "{{item.ip}} {{item.name}}"
-        state: present
+        state: "{{item.state}}"
       with_items: "{{ host_list }}"
 
       tags:
