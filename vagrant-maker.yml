@@ -1,25 +1,29 @@
 ---
 - hosts: localhost
   gather_facts: false
+
+  vars:
+    debug: "false"
+  
   # All data is sourced from group_vars/all.yml
 
   # Basically generate, with a state:
   #   ssh config
   #   inventory file
+  #   /etc/hosts
+
   # Really want to get this to run each time you provison the VM
   # then you don't have to worry about creating stuff, it just runs
-
-  # To get rid of the state part, we need to do a jinja template, I think
-  # Basically just want to run the vagrant provisioner to just do this
-  # and take care of the ssh file and inventory if we delete stuff from all.yml
-
-  # Still need to create the inventory file, as other plays outside of this project
-  # will reference that file
 
   tasks:
     - name: Print the tests 
       debug:
         var: host_list
+
+      when: (debug == 'true')
+
+      tags:
+        - debug
 
     - name: Add hosts for vagrant into sshconfg
       blockinfile:
@@ -39,7 +43,10 @@
       with_items:
         - "{{host_list}}"
 
-    - name: Ensure "fav=lemonade is in section "[drinks]" in specified file
+      tags:
+        - sshconfg
+
+    - name: Generate the inventory file
       ini_file:
         path: "{{host_file}}"
         section: "{{item.group}}"
@@ -48,8 +55,7 @@
       with_items: "{{ host_list }}"
 
       tags:
-        - hosts
-
+        - inventory
 
     - name: Add IP address of all hosts to all hosts needs -K on cli
       become: true
@@ -58,4 +64,7 @@
         line: "{{item.name}} ansible_host={{item.ip}}"
         state: present
       with_items: "{{ host_list }}"
+
+      tags:
+        - hosts
   
