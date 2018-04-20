@@ -1,16 +1,27 @@
 ---
 - hosts: localhost
   gather_facts: false
+
+  vars:
+    debug: "false"
+
   # All data is sourced from group_vars/all.yml
 
   # Basically generate, with a state:
   #   ssh config
   #   inventory file
+  #   /etc/hosts
+
+  # Really want to get this to run each time you provison the VM
+  # then you don't have to worry about creating stuff, it just runs
 
   tasks:
     - name: Print the tests 
       debug:
         var: host_list
+      when: (debug == 'true')
+      tags:
+        - debug
 
     - name: Add hosts for vagrant into sshconfg
       blockinfile:
@@ -30,10 +41,40 @@
       with_items:
         - "{{host_list}}"
 
-    - name: Add hosts to inventory
+      tags:
+        - sshconfg
+
+    # This keeps adding an extra dev host..
+    - name: add group to inventory file
       lineinfile:
         path: "{{host_file}}"
-        line: "{{item.name}} ansible_ssh_host={{item.ip}}"
+        regexp: "{{item.group}}"
+        line: "[{{item.group}}]"
         state: "{{item.state}}"
-      with_items:
-        - "{{host_list}}"
+        # firstmatch: yes 2.5 only
+      with_items: "{{ host_list }}"
+      tags:
+        - group
+
+    - name: add host to inventory file
+      lineinfile:
+        path: "{{host_file}}"
+        regexp: "{{item.name}}"
+        line: "{{item.name}} ansible_ssh_host={{item.ip}}"
+        insertafter: "{{item.group}}"
+        state: "{{item.state}}"
+      with_items: "{{ host_list }}"
+      tags:
+        - inv
+
+    - name: Add IP address of all hosts to all hosts needs -K on cli
+      become: true
+      lineinfile:
+        dest: /etc/hosts
+        line: "{{item.ip}} {{item.name}}"
+        state: "{{item.state}}"
+      with_items: "{{ host_list }}"
+
+      tags:
+        - hosts
+  

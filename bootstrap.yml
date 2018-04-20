@@ -2,7 +2,11 @@
 - hosts: all
   gather_facts: yes
   become: true
-  # do a os check, and only run the selinux with centos:
+  
+  # Vagrant provison runs this file, so you don't actually need an inventory
+  # it does that for you.
+  # Basically we setup a bunch of environment stuff so we can ssh into the host
+  # Using all the data from all.yml
 
   tasks:
     - name: Create User

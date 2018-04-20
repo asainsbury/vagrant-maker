@@ -6,19 +6,22 @@ ssh_config: "~/.ssh/config"
 projects_root: "~/projects/"
 vagrant_root: "~/projects/vagrant/"
 playbook_root: "~/projects/playbooks/"
+host_path: "~/projects/inventory/"
 host_file: "~/projects/inventory/hosts"
 
 # These vars get called by the vagrant file
 # The file ingests all this data
 # Ansible version is used during the bootstrap, might need to be autgenerated
 # as it will throw an error if testing with a python virtual env, hard coded for now
-bootstrap: "bootstrap.yml"
+
 ansible_vagrant: "2.4.2.0"
 
+# Some of this information is redundant and isn't called by anything, thats just a warning.
 # Other varables
 domain: "test.local"
 primary: "8.8.8.8"
 secondary: "8.8.4.4"
+play: "vagrant-maker.yml"
 
 # Box specific vars
 # Dict of dicts in case we want to build out more data
@@ -41,12 +44,20 @@ cisco_9000:
 # Vagrant reads in the dict of list, but it doesn't know about the other vars
 # so for now you have to fully specify the box data, no shortcuts.
 # probably can do this inside of the vagrant file, as we suck all that info in
+
+# Bootstrap part passes the name into the play via vagrant, so you can't dedup that part
+# but is does mean you can call differnet bootstraps for different hosts
+
+# Remeber the state flag
+# If you want to clean up the sshconfig, inventory file, and hosts file
+# you can add the abscent flag before you destroy the vm
+
 host_list:
   - name: dev1
     provider: virtualbox
     group: dev
-    ip: 1.1.1.10
-    vm_name: splunk1
+    ip: "1.1.1.10"
+    vm_name: dev1
     mem: 512
     cpus: 1
     box: 'centos/7'
@@ -58,8 +69,8 @@ host_list:
   - name: dev2
     provider: virtualbox
     group: dev
-    ip: 1.1.1.11
-    vm_name: dev
+    ip: "1.1.1.11"
+    vm_name: dev2
     mem: 512
     cpus: 1
     box: 'centos/7'
@@ -68,19 +79,18 @@ host_list:
     type: "linux"
     state: "present"
 
-# Templated data, as this format is working well: 
-  # - name: centos6
-  #   provider: virtualbox
-  #   group: monitoring
-  #   ip: 1.1.1.12
-  #   vm_name: centos6
-  #   mem: 512
-  #   cpus: 1
-  #   box: 'centos/6'
-  #   box_url: 'https://vagrantcloud.com/centos/boxes/6'
-  #   bootstrap: 'bootstrap.yml'
-  #   type: "linux"
-  #   state: "absent"
+  - name: dev3
+    provider: virtualbox
+    group: git
+    ip: "1.1.1.12"
+    vm_name: dev3
+    mem: 2048
+    cpus: 2
+    box: 'centos/7'
+    box_url: 'https://vagrantcloud.com/centos/boxes/7'
+    bootstrap: 'bootstrap.yml'
+    type: "linux"
+    state: "present"
 
  # Templated data, as this format is working well: 
   # - name: xxx
