@@ -39,10 +39,23 @@
       with_items:
         - "{{host_list}}"
 
-    - name: Add hosts to inventory
-      lineinfile:
+    - name: Ensure "fav=lemonade is in section "[drinks]" in specified file
+      ini_file:
         path: "{{host_file}}"
-        line: "{{item.name}} ansible_ssh_host={{item.ip}}"
-        state: "{{item.state}}"
-      with_items:
-        - "{{host_list}}"
+        section: "{{item.group}}"
+        option: "{{item.name}} ansible_ssh_host"
+        value: "{{item.ip}}"
+      with_items: "{{ host_list }}"
+
+      tags:
+        - hosts
+
+
+    - name: Add IP address of all hosts to all hosts needs -K on cli
+      become: true
+      lineinfile:
+        dest: /etc/hosts
+        line: "{{item.name}} ansible_host={{item.ip}}"
+        state: present
+      with_items: "{{ host_list }}"
+  

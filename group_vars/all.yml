@@ -65,7 +65,7 @@ host_list:
     provider: virtualbox
     group: dev
     ip: 1.1.1.11
-    vm_name: dev
+    vm_name: dev2
     mem: 512
     cpus: 1
     box: 'centos/7'
@@ -74,19 +74,18 @@ host_list:
     type: "linux"
     state: "present"
 
-# Templated data, as this format is working well: 
-  # - name: centos6
-  #   provider: virtualbox
-  #   group: monitoring
-  #   ip: 1.1.1.12
-  #   vm_name: centos6
-  #   mem: 512
-  #   cpus: 1
-  #   box: 'centos/6'
-  #   box_url: 'https://vagrantcloud.com/centos/boxes/6'
-  #   bootstrap: 'bootstrap.yml'
-  #   type: "linux"
-  #   state: "absent"
+  - name: dev3
+    provider: virtualbox
+    group: git
+    ip: 1.1.1.12
+    vm_name: dev3
+    mem: 2048
+    cpus: 2
+    box: 'centos/7'
+    box_url: 'https://vagrantcloud.com/centos/boxes/7'
+    bootstrap: 'bootstrap.yml'
+    type: "linux"
+    state: "present"
 
  # Templated data, as this format is working well: 
   # - name: xxx
