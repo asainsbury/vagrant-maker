@@ -3,7 +3,7 @@
   gather_facts: false
 
   vars:
-    debug: "false"
+    debug: "true"
 
   # All data is sourced from group_vars/all.yml
 
