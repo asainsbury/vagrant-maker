@@ -3,6 +3,7 @@
   gather_facts: yes
   become: true
   
+  
   # Vagrant provison runs this file, so you don't actually need an inventory
   # it does that for you.
   # Basically we setup a bunch of environment stuff so we can ssh into the host
@@ -56,9 +57,6 @@
                   line="PermitRootLogin no"
                   state=present
       notify: restart_ssh
-
-    #  Fails with centos6, 
-    # fatal: [centos6]: FAILED! => {"changed": false, "msg": "libselinux-python required for this module"}
 
     - name: Turn off selinux, only on Centos or RHEL
       selinux:
