@@ -1,9 +1,10 @@
 ---
 - hosts: localhost
   gather_facts: false
+  sudo: true
 
   vars:
-    debug: "false"
+    debug: "true"
 
   # All data is sourced from group_vars/all.yml
 
@@ -14,6 +15,13 @@
 
   # Really want to get this to run each time you provison the VM
   # then you don't have to worry about creating stuff, it just runs
+  # Tested on 2.4 and 2.5 2.6
+
+  # Need to make some path checking at the start, as this keeps failing
+  # Also exit if not run as root checking
+  # Update the readme to how you run it..
+  # Like make sure to have ansible installed, then run the playbook then vagrant up
+  # Also had to download the boxes first the it was good
 
   tasks:
     - name: Print the tests 
@@ -22,6 +30,12 @@
       when: (debug == 'true')
       tags:
         - debug
+        
+    - name: get the username running the deploy
+      local_action: command whoami
+      register: username_on_the_host
+
+    - debug: var=username_on_the_host
 
     - name: Add hosts for vagrant into sshconfg
       blockinfile:
@@ -51,7 +65,7 @@
         regexp: "{{item.group}}"
         line: "[{{item.group}}]"
         state: "{{item.state}}"
-        # firstmatch: yes 2.5 only
+        firstmatch: yes
       with_items: "{{ host_list }}"
       tags:
         - group

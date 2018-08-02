@@ -1,7 +1,7 @@
 # Data to test, in groupvars
 ---
 # Common vars just calling out all the things I can think of:
-ssh_user: "andy"
+ssh_user: "user"
 ssh_config: "~/.ssh/config"
 projects_root: "~/projects/"
 vagrant_root: "~/projects/vagrant/"
@@ -14,7 +14,7 @@ host_file: "~/projects/inventory/hosts"
 # Ansible version is used during the bootstrap, might need to be autgenerated
 # as it will throw an error if testing with a python virtual env, hard coded for now
 
-ansible_vagrant: "2.4.2.0"
+ansible_vagrant: "2.6.1"
 
 # Some of this information is redundant and isn't called by anything, thats just a warning.
 # Other varables
@@ -60,8 +60,8 @@ host_list:
     vm_name: dev1
     mem: 512
     cpus: 1
-    box: 'centos/7'
-    box_url: 'https://vagrantcloud.com/centos/boxes/7'
+    box: 'centos/6'
+    box_url: 'https://vagrantcloud.com/centos/boxes/6'
     bootstrap: 'bootstrap.yml'
     type: "linux"
     state: "present"
@@ -88,6 +88,19 @@ host_list:
     cpus: 2
     box: 'centos/7'
     box_url: 'https://vagrantcloud.com/centos/boxes/7'
+    bootstrap: 'bootstrap.yml'
+    type: "linux"
+    state: "present"
+
+  - name: dev4
+    provider: virtualbox
+    group: eve
+    ip: "1.1.1.13"
+    vm_name: dev4
+    mem: 2048
+    cpus: 2
+    box: 'ubuntu/trusty64'
+    box_url: 'https://app.vagrantup.com/ubuntu/boxes/trusty64'
     bootstrap: 'bootstrap.yml'
     type: "linux"
     state: "present"
