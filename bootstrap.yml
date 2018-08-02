@@ -3,7 +3,6 @@
   gather_facts: yes
   become: true
   
-  
   # Vagrant provison runs this file, so you don't actually need an inventory
   # it does that for you.
   # Basically we setup a bunch of environment stuff so we can ssh into the host

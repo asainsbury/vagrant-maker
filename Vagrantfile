@@ -1,7 +1,7 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby 
 
-# References to other peoples work, who I've massively plgerised:
+# References to other peoples work, who I've massively plagiarized:
 # http://bertvv.github.io/notes-to-self/2015/10/05/one-vagrantfile-to-rule-them-all/
 # http://hakunin.com/six-ansible-practices
 # https://stackoverflow.com/questions/16708917/how-do-i-include-variables-in-my-vagrantfile
@@ -17,7 +17,7 @@ else
 end
 
 
-# Define a nice function to sor out all the networking
+# Define a nice function to sort out all the networking
 # Gets called in the main section
 def network_options(host)
   options = {}
@@ -49,6 +49,8 @@ end
 # Only seems to work when you grab the folder name?
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+
+  # Call the function network_options
   data['host_list'].each do |host|
     
     set_group = '/' + host['group']
@@ -70,6 +72,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       end
       
       if host['type'] == "cisco"
+
         # do the extra interfaces here, work with the group vars
         node.vm.network "forwarded_port", guest: 22, host: host['ansible_ssh_port'], auto_correct: true, id: "ssh"
         node.vm.network "forwarded_port", guest: 443, host: host['cisco_api_port'], auto_correct: true, id: "https"
@@ -95,17 +98,19 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       end
       
       # If we supplied a bootstrap variable in the data, then execute
-      # Ignore cisco, for now, only run on a linux host
+      # Ignore Cisco, only run on a Linux host
       if host['type'] == "linux"
         node.vm.provision "ansible" do |ansible|
 
-          # A little check for the level of python requrired
+          # A little check for the level of python required
           if host['python3']
             ansible.extra_vars = { ansible_python_interpreter: "/usr/bin/python3" }
           end
          
+          # Finish off the provisioning 
           ansible.compatibility_mode = "auto"
           ansible.playbook = host['bootstrap']
+
         end
       end
     end

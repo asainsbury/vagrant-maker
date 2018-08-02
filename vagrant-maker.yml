@@ -9,7 +9,7 @@
 
   # Basically generate, with a state:
   #   ssh config
-  #   inventory file
+  #   inventory file plus the path
   #   /etc/hosts
 
 
