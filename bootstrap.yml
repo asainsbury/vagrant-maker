@@ -9,6 +9,12 @@
   # Using all the data from all.yml
 
   tasks:
+    - name: Add a special package, only on Centos or RHEL https://github.com/bayandin/webpagetest-private/issues/1
+      package:
+        name: libselinux-python
+        state: present
+      when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+
     - name: Create User
       user:
         name: "{{ssh_user}}"

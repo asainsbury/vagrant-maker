@@ -1,7 +1,7 @@
 # Data to test, in groupvars
 ---
 # Common vars just calling out all the things I can think of:
-ssh_user: "andy"
+ssh_user: "user"
 ssh_config: "~/.ssh/config"
 projects_root: "~/projects/"
 vagrant_root: "~/projects/vagrant/"

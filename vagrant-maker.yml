@@ -1,6 +1,7 @@
 ---
 - hosts: localhost
   gather_facts: false
+  sudo: true
 
   vars:
     debug: "true"
@@ -29,6 +30,12 @@
       when: (debug == 'true')
       tags:
         - debug
+        
+    - name: get the username running the deploy
+      local_action: command whoami
+      register: username_on_the_host
+
+    - debug: var=username_on_the_host
 
     - name: Add hosts for vagrant into sshconfg
       blockinfile:
