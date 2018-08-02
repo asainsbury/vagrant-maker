@@ -54,6 +54,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     set_group = '/' + host['group']
 
     config.vm.define host['name'] do |node|
+      node.vm.box_download_insecure = true
       node.vm.box = host['box']
       node.vm.box_url = host['box_url']
       node.vm.hostname = host['name']
@@ -97,7 +98,12 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       # Ignore cisco, for now, only run on a linux host
       if host['type'] == "linux"
         node.vm.provision "ansible" do |ansible|
-          ansible.version = data['ansible_vagrant']
+
+          # A little check for the level of python requrired
+          if host['python3']
+            ansible.extra_vars = { ansible_python_interpreter: "/usr/bin/python3" }
+          end
+         
           ansible.compatibility_mode = "auto"
           ansible.playbook = host['bootstrap']
         end

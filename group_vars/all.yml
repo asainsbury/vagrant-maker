@@ -6,13 +6,14 @@ ssh_config: "~/.ssh/config"
 projects_root: "~/projects/"
 host_path: "~/projects/inventory/"
 host_file: "~/projects/inventory/hosts"
+# ansible_python_interpreter: /usr/bin/python3
 
 # These vars get called by the vagrant file
 # The file ingests all this data
 # Ansible version is used during the bootstrap, might need to be autgenerated
 # as it will throw an error if testing with a python virtual env, hard coded for now
 
-ansible_vagrant: "2.6.1"
+# ansible_vagrant: "2.6.1"
 
 # Some of this information is redundant and isn't called by anything, thats just a warning.
 # Other varables
@@ -95,13 +96,14 @@ host_list:
     group: eve
     ip: "1.1.1.13"
     vm_name: dev4
-    mem: 2048
+    mem: 512
     cpus: 2
-    box: 'ubuntu/trusty64'
-    box_url: 'https://app.vagrantup.com/ubuntu/boxes/trusty64'
+    box: 'ubuntu/bionic64'
+    box_url: 'https://app.vagrantup.com/ubuntu/boxes/bionic64'
     bootstrap: 'bootstrap.yml'
     type: "linux"
     state: "present"
+    python3: true
 
  # Templated data, as this format is working well: 
   # - name: xxx
