@@ -19,6 +19,12 @@
         ssh_key_bits: 1024
         ssh_key_file: .ssh/id_rsa
 
+    - name: Add a special package, only on Centos or RHEL https://github.com/bayandin/webpagetest-private/issues/1
+      package:
+        name: libselinux-python
+        state: present
+      when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+
     - name: Set authorized key from file
       authorized_key:
         user: "{{ssh_user}}"

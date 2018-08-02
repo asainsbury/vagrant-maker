@@ -14,7 +14,13 @@
 
   # Really want to get this to run each time you provison the VM
   # then you don't have to worry about creating stuff, it just runs
-  # Tested on 2.4 and 2.5
+  # Tested on 2.4 and 2.5 2.6
+
+  # Need to make some path checking at the start, as this keeps failing
+  # Also exit if not run as root checking
+  # Update the readme to how you run it..
+  # Like make sure to have ansible installed, then run the playbook then vagrant up
+  # Also had to download the boxes first the it was good
 
   tasks:
     - name: Print the tests 
