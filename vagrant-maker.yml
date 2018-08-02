@@ -1,10 +1,9 @@
 ---
 - hosts: localhost
   gather_facts: false
-  sudo: true
 
   vars:
-    debug: "true"
+    debug: "false"
 
   # All data is sourced from group_vars/all.yml
 
@@ -31,9 +30,9 @@
       tags:
         - debug
         
-    - name: get the username running the deploy
-      local_action: command whoami
-      register: username_on_the_host
+    # - name: This playbook must run as root to edit the hosts file
+    #   local_action: command whoami
+    #   register: username_on_the_host
 
     - debug: var=username_on_the_host
 
@@ -58,7 +57,7 @@
       tags:
         - sshconfg
 
-    # This keeps adding an extra dev host..
+    # This looks like it is now fixed
     - name: add group to inventory file
       lineinfile:
         path: "{{host_file}}"

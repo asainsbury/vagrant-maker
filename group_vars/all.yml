@@ -4,8 +4,6 @@
 ssh_user: "user"
 ssh_config: "~/.ssh/config"
 projects_root: "~/projects/"
-vagrant_root: "~/projects/vagrant/"
-playbook_root: "~/projects/playbooks/"
 host_path: "~/projects/inventory/"
 host_file: "~/projects/inventory/hosts"
 
