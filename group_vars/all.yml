@@ -7,6 +7,11 @@ projects_root: "~/projects/"
 host_path: "~/projects/inventory/"
 host_file: "~/projects/inventory/hosts"
 
+box_list:
+  - 'centos/6'
+  - 'centos/7'
+  - 'ubuntu/bionic64'
+
 # These vars get called by the vagrant file
 # The file ingests all this data
 
