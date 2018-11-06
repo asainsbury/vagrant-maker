@@ -3,7 +3,6 @@
   gather_facts: yes
   become: true
   
-  
   # Vagrant provison runs this file, so you don't actually need an inventory
   # it does that for you.
   # Basically we setup a bunch of environment stuff so we can ssh into the host
@@ -63,7 +62,38 @@
         policy: targeted
         state: permissive
       when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+
+    - name: Copy over the ssh config file
+      copy:
+        src: ~/.ssh/config
+        dest: /home/user/.ssh/config
+        owner: "{{ssh_user}}"
+        mode: 0600
    
+    # Dependencies: 
+    # Make some dummy keys on one of the VM's 
+    # and place them in the root of this play
+
+    - name: Copy over the ssh public key
+      copy:
+        src: id_rsa.pub
+        dest: "{{ssh_home}}.ssh/id_rsa.pub"
+        owner: "{{ssh_user}}"
+        mode: 0600
+
+    - name: Copy over the ssh private key
+      copy:
+        src: id_rsa
+        dest: "{{ssh_home}}.ssh/id_rsa"
+        owner: "{{ssh_user}}"
+        mode: 0600
+
+    - name: Set authorized key from file
+      authorized_key:
+        user: "{{ssh_user}}"
+        state: present
+        key: "{{ lookup('file', 'id_rsa.pub') }}"
+
   handlers:
     - name: restart_ssh
       systemd:

@@ -3,28 +3,13 @@
   gather_facts: false
 
   vars:
-    debug: "false"
+    update: false
 
-  # All data is sourced from group_vars/all.yml
+# To Do
+# Add a destroy task, which cleans up all the config
+# and get rid of the "Status" section in the all.yml file
 
-  # Basically generate, with a state:
-  #   ssh config
-  #   inventory file
-  #   /etc/hosts
-
-
-  # Update the readme to how you run it..
-  # Like make sure to have ansible installed, then run the playbook then vagrant up
-  # Also had to download the boxes first the it was good
-
-  tasks:
-    - name: Print the tests 
-      debug:
-        var: host_list
-      when: (debug == 'true')
-      tags:
-        - debug
-        
+  tasks:      
     - name: Check inventory paths exist and create if not
       file:
         path: "{{ host_path }}"
@@ -61,6 +46,23 @@
 
       tags:
         - sshconfg
+  
+
+    - name: Add the Vagrant Boxes
+      shell: 'vagrant box add {{item}} --insecure --provider virtualbox'
+   
+      register: result
+
+      with_items:
+        - "{{box_list}}"
+
+      failed_when: "'A name is required' in result.stderr"
+
+      when: update
+
+      tags:
+        - box_add
+
 
     - name: add group to inventory file
       lineinfile:
@@ -84,14 +86,3 @@
       tags:
         - inv
 
-    - name: Add IP address of all hosts to all hosts needs -K on cli
-      become: true
-      lineinfile:
-        dest: /etc/hosts
-        line: "{{item.ip}} {{item.name}}"
-        state: "{{item.state}}"
-      with_items: "{{ host_list }}"
-
-      tags:
-        - hosts
-  
