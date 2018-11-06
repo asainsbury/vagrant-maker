@@ -1,7 +1,10 @@
 ---
 - hosts: localhost
   gather_facts: false
-  become_user: user
+
+
+# To Do
+# Add a destroy task, which cleans up all the config
 
   tasks:      
     - name: Check inventory paths exist and create if not
@@ -78,18 +81,3 @@
       tags:
         - inv
 
-    - name: Add IP address of all hosts to all hosts needs -K on cli
-      become: true
-      lineinfile:
-        dest: /etc/hosts
-        line: "{{item.ip}} {{item.name}}"
-        state: "{{item.state}}"
-      with_items: "{{ host_list }}"
-
-      tags:
-        - hosts
-    
-   
-
-
-  

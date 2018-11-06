@@ -62,7 +62,28 @@
         policy: targeted
         state: permissive
       when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+
+    - name: Copy over the ssh config file
+      copy:
+        src: ~/.ssh/config
+        dest: /home/user/.ssh/config
+        owner: "{{ssh_user}}"
+        mode: 0600
    
+    - name: Copy over the ssh public key
+      copy:
+        src: ~/.ssh/id_rsa.pub
+        dest: /home/user/.ssh/id_rsa.pub
+        owner: "{{ssh_user}}"
+        mode: 0600
+
+    - name: Copy over the ssh private key
+      copy:
+        src: ~/.ssh/id_rsa
+        dest: /home/user/.ssh/id_rsa
+        owner: "{{ssh_user}}"
+        mode: 0600
+
   handlers:
     - name: restart_ssh
       systemd:
