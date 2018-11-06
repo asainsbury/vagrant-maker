@@ -2,6 +2,7 @@
 ---
 # Common vars just calling out all the things I can think of:
 ssh_user: "user"
+ssh_home: "/home/user/"
 ssh_config: "~/.ssh/config"
 projects_root: "~/projects/"
 host_path: "~/projects/inventory/"
