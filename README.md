@@ -4,7 +4,9 @@ Ansible playbook to create a Vagrantfile and modify your .ssh/config file and al
 ## Introduction
 This code is a way for me to streamline the building of Vagrant hosts, on my Mac.
 
-After lots of research (Google) I've managed to come up with a compact and bijou Vagrantfile, which reads in a templated set of data (in YAMAL obviously!) and spins up the hosts when you vagrant up.  To add to the smoothness of developing with Ansible, I also create some code in .ssh/config to alias the hostname, then generate the inventory file. Another play takes care of provisioning the host with ssh keys and adds a user.
+After lots of research (Google) I've managed to come up with a compact and bijou Vagrantfile, which reads in a templated set of data (in YAML obviously!) and spins up the hosts when you vagrant up.  To add to the smoothness of developing with Ansible, I also create some code in .ssh/config to alias the hostname, then generate the inventory file. Another play takes care of provisioning the host with ssh keys and adds a user.
+
+This allows you to be able to ssh into all the VM's and between all VM's for fast development.
 
 Run the playbook `ansible-playbook vagrant-maker.yml`
 
@@ -20,10 +22,25 @@ Both tasks have a state of presence, so you can remove the config by simply chan
 - hosts: localhost
   gather_facts: false
 
-  tasks:
-    - name: Print the tests 
-      debug:
-        var: host_list
+  vars:
+    update: false
+
+  tasks:      
+    - name: Check inventory paths exist and create if not
+      file:
+        path: "{{ host_path }}"
+        state: directory
+
+      tags:
+        - host_path
+
+    - name: Check host inventory exist and create if not
+      file:
+        path: "{{ host_file }}"
+        state: touch
+
+      tags:
+        - host_file
 
     - name: Add hosts for vagrant into sshconfg
       blockinfile:
@@ -43,13 +60,48 @@ Both tasks have a state of presence, so you can remove the config by simply chan
       with_items:
         - "{{host_list}}"
 
-    - name: Add hosts to inventory
+      tags:
+        - sshconfg
+  
+
+    - name: Add the Vagrant Boxes
+      shell: 'vagrant box add {{item}} --insecure --provider virtualbox'
+   
+      register: result
+
+      with_items:
+        - "{{box_list}}"
+
+      failed_when: "'A name is required' in result.stderr"
+
+      when: update
+
+      tags:
+        - box_add
+
+
+    - name: add group to inventory file
       lineinfile:
         path: "{{host_file}}"
-        line: "{{item.name}} ansible_ssh_host={{item.ip}}"
+        regexp: "{{item.group}}"
+        line: "[{{item.group}}]"
         state: "{{item.state}}"
-      with_items:
-        - "{{host_list}}"
+        firstmatch: yes
+      with_items: "{{ host_list }}"
+      tags:
+        - group
+
+    - name: add host to inventory file
+      lineinfile:
+        path: "{{host_file}}"
+        regexp: "{{item.name}}"
+        line: "{{item.name}} ansible_ssh_host={{item.ip}}"
+        insertafter: "{{item.group}}"
+        state: "{{item.state}}"
+      with_items: "{{ host_list }}"
+      tags:
+        - inv
+
 ```
 # Bootstraping the linux hosts
 Post vagrant up, calls this playbook, which sets up the environment for simple ssh access. This have been tested on both Ubunt and Centos, as listed in the groupvars section.
@@ -59,8 +111,19 @@ Post vagrant up, calls this playbook, which sets up the environment for simple s
 - hosts: all
   gather_facts: yes
   become: true
+  
+  # Vagrant provison runs this file, so you don't actually need an inventory
+  # it does that for you.
+  # Basically we setup a bunch of environment stuff so we can ssh into the host
+  # Using all the data from all.yml
 
   tasks:
+    - name: Add a special package, only on Centos or RHEL https://github.com/bayandin/webpagetest-private/issues/1
+      package:
+        name: libselinux-python
+        state: present
+      when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+
     - name: Create User
       user:
         name: "{{ssh_user}}"
@@ -70,6 +133,12 @@ Post vagrant up, calls this playbook, which sets up the environment for simple s
         generate_ssh_key: yes
         ssh_key_bits: 1024
         ssh_key_file: .ssh/id_rsa
+
+    - name: Add a special package, only on Centos or RHEL https://github.com/bayandin/webpagetest-private/issues/1
+      package:
+        name: libselinux-python
+        state: present
+      when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
 
     - name: Set authorized key from file
       authorized_key:
@@ -99,9 +168,41 @@ Post vagrant up, calls this playbook, which sets up the environment for simple s
 
     - name: Turn off selinux, only on Centos or RHEL
       selinux:
-        state: disabled
+        policy: targeted
+        state: permissive
       when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+
+    - name: Copy over the ssh config file
+      copy:
+        src: ~/.ssh/config
+        dest: /home/user/.ssh/config
+        owner: "{{ssh_user}}"
+        mode: 0600
    
+    # Dependencies: 
+    # Make some dummy keys on one of the VM's 
+    # and place them in the root of this play
+
+    - name: Copy over the ssh public key
+      copy:
+        src: id_rsa.pub
+        dest: "{{ssh_home}}.ssh/id_rsa.pub"
+        owner: "{{ssh_user}}"
+        mode: 0600
+
+    - name: Copy over the ssh private key
+      copy:
+        src: id_rsa
+        dest: "{{ssh_home}}.ssh/id_rsa"
+        owner: "{{ssh_user}}"
+        mode: 0600
+
+    - name: Set authorized key from file
+      authorized_key:
+        user: "{{ssh_user}}"
+        state: present
+        key: "{{ lookup('file', 'id_rsa.pub') }}"
+
   handlers:
     - name: restart_ssh
       systemd:
@@ -110,18 +211,18 @@ Post vagrant up, calls this playbook, which sets up the environment for simple s
 ```
 
 ## The Group Vars
-It all starts at the beggining, which is a group vars files with paths and all sorts of other stuff.
+It all starts at the beggining, which is a group vars files with paths and all sorts of other stuff. Look at this file for all the variables.
 
 ### Host list
 This is the list we are  going to use to generate ssh config and hosts inventory, but also is used by the vagrant file to build the virtual machines.
 
 ```
 host_list:
-  - name: splunk1
+  - name: dev1
     provider: virtualbox
-    group: monitoring
-    ip: 1.1.1.10
-    vm_name: splunk1
+    group: dev
+    ip: "1.1.1.10"
+    vm_name: dev1
     mem: 512
     cpus: 1
     box: 'centos/7'
@@ -130,15 +231,28 @@ host_list:
     type: "linux"
     state: "present"
 
-  - name: dev
+  - name: dev2
     provider: virtualbox
-    group: monitoring
-    ip: 1.1.1.11
-    vm_name: dev
+    group: dev
+    ip: "1.1.1.11"
+    vm_name: dev2
     mem: 512
     cpus: 1
-    box: 'ubuntu/trusty64'
-    box_url: 'https://vagrantcloud.com/ubuntu/trusty64'
+    box: 'centos/7'
+    box_url: 'https://vagrantcloud.com/centos/boxes/7'
+    bootstrap: 'bootstrap.yml'
+    type: "linux"
+    state: "present"
+
+  - name: dev3
+    provider: virtualbox
+    group: dev
+    ip: "1.1.1.12"
+    vm_name: dev3
+    mem: 512
+    cpus: 1
+    box: 'centos/7'
+    box_url: 'https://vagrantcloud.com/centos/boxes/7'
     bootstrap: 'bootstrap.yml'
     type: "linux"
     state: "present"
@@ -148,30 +262,42 @@ host_list:
 The playbook iterates over the list and generates blocks of text for the ssh config:
 
 ```
-# BEGIN ANSIBLE MANAGED BLOCK splunk1
-Host splunk1 *.test.local
+Host *
+    ServerAliveInterval 120
+# BEGIN ANSIBLE MANAGED BLOCK dev1
+Host dev1 *.test.local
   hostname 1.1.1.10
   StrictHostKeyChecking no
   UserKnownHostsFile=/dev/null
-  User andy
-  LogLevel ERROR  
-# END ANSIBLE MANAGED BLOCK splunk1
-# BEGIN ANSIBLE MANAGED BLOCK dev
-Host dev *.test.local
+  User user
+  LogLevel ERROR
+# END ANSIBLE MANAGED BLOCK dev1
+# BEGIN ANSIBLE MANAGED BLOCK dev2
+Host dev2 *.test.local
   hostname 1.1.1.11
   StrictHostKeyChecking no
   UserKnownHostsFile=/dev/null
-  User andy
-  LogLevel ERROR  
-# END ANSIBLE MANAGED BLOCK dev
+  User user
+  LogLevel ERROR
+# END ANSIBLE MANAGED BLOCK dev2
+# BEGIN ANSIBLE MANAGED BLOCK dev3
+Host dev3 *.test.local
+  hostname 1.1.1.12
+  StrictHostKeyChecking no
+  UserKnownHostsFile=/dev/null
+  User user
+  LogLevel ERROR
+# END ANSIBLE MANAGED BLOCK dev3
 ```
 
 ### Hosts inventory
 And lines of config for the hosts inventory file:
 
 ```
-splunk1 ansible_ssh_host=1.1.1.10
-dev ansible_ssh_host=1.1.1.11
+[dev]
+dev1 ansible_ssh_host=1.1.1.10
+dev2 ansible_ssh_host=1.1.1.11
+dev3 ansible_ssh_host=1.1.1.12
 ```
 
 ## Vagrantfile
