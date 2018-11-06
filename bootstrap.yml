@@ -70,19 +70,26 @@
         owner: "{{ssh_user}}"
         mode: 0600
    
+    # Make some dummy keys and place them in the root of this play:
     - name: Copy over the ssh public key
       copy:
-        src: ~/.ssh/id_rsa.pub
+        src: id_rsa.pub
         dest: /home/user/.ssh/id_rsa.pub
         owner: "{{ssh_user}}"
         mode: 0600
 
     - name: Copy over the ssh private key
       copy:
-        src: ~/.ssh/id_rsa
+        src: id_rsa
         dest: /home/user/.ssh/id_rsa
         owner: "{{ssh_user}}"
         mode: 0600
+
+    - name: Set authorized key from file
+      authorized_key:
+        user: "{{ssh_user}}"
+        state: present
+        key: "{{ lookup('file', 'id_rsa.pub') }}"
 
   handlers:
     - name: restart_ssh

@@ -31,7 +31,7 @@ box_list:
 host_list:
   - name: dev1
     provider: virtualbox
-    group: logstash
+    group: dev
     ip: "1.1.1.10"
     vm_name: dev1
     mem: 512
@@ -44,7 +44,7 @@ host_list:
 
   - name: dev2
     provider: virtualbox
-    group: elastic
+    group: dev
     ip: "1.1.1.11"
     vm_name: dev2
     mem: 512
@@ -57,7 +57,7 @@ host_list:
 
   - name: dev3
     provider: virtualbox
-    group: kibana
+    group: dev
     ip: "1.1.1.12"
     vm_name: dev3
     mem: 512

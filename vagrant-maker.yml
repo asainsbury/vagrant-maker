@@ -2,9 +2,12 @@
 - hosts: localhost
   gather_facts: false
 
+  vars:
+    update: false
 
 # To Do
 # Add a destroy task, which cleans up all the config
+# and get rid of the "Status" section in the all.yml file
 
   tasks:      
     - name: Check inventory paths exist and create if not
@@ -54,6 +57,8 @@
         - "{{box_list}}"
 
       failed_when: "'A name is required' in result.stderr"
+
+      when: update
 
       tags:
         - box_add
