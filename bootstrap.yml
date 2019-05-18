@@ -18,7 +18,7 @@
     - name: Create User
       user:
         name: "{{ssh_user}}"
-        password: Password@1
+        password: "{{ 'password' | password_hash('sha512') }}"
         shell: /bin/bash
         append: yes
         generate_ssh_key: yes
@@ -30,12 +30,6 @@
         name: libselinux-python
         state: present
       when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
-
-    - name: Set authorized key from file
-      authorized_key:
-        user: "{{ssh_user}}"
-        state: present
-        key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
 
     - name: Add user to sudoers
       lineinfile: dest=/etc/sudoers
@@ -65,7 +59,7 @@
 
     - name: Copy over the ssh config file
       copy:
-        src: ~/.ssh/config
+        src: "{{ssh_config}}"
         dest: /home/user/.ssh/config
         owner: "{{ssh_user}}"
         mode: 0600
@@ -73,15 +67,14 @@
     # Dependencies: 
     # Make some dummy keys on one of the VM's 
     # and place them in the root of this play
-
-    - name: Copy over the ssh public key
+    - name: Copy over the dummy pub ssh keys to each node
       copy:
         src: id_rsa.pub
         dest: "{{ssh_home}}.ssh/id_rsa.pub"
         owner: "{{ssh_user}}"
         mode: 0600
 
-    - name: Copy over the ssh private key
+    - name: Copy over the dummy priv ssh keys to each node
       copy:
         src: id_rsa
         dest: "{{ssh_home}}.ssh/id_rsa"
@@ -93,6 +86,14 @@
         user: "{{ssh_user}}"
         state: present
         key: "{{ lookup('file', 'id_rsa.pub') }}"
+
+    - name: Set authorized key from file from the control machine
+      authorized_key:
+        user: "{{ssh_user}}"
+        state: present
+        key: "{{ lookup('file', '{{ssh_pub}}') }}"
+
+
 
   handlers:
     - name: restart_ssh

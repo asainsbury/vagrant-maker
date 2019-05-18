@@ -5,8 +5,11 @@ ssh_user: "user"
 ssh_home: "/home/user/"
 ssh_config: "~/.ssh/config"
 projects_root: "~/projects/"
+ssh_pub: "~/.ssh/id_rsa.pub"
+ssh_priv: "~/.ssh/id_rsa"
 host_path: "~/projects/inventory/"
 host_file: "~/projects/inventory/hosts"
+
 
 box_list:
   - 'centos/6'
@@ -80,7 +83,7 @@ host_list:
   #   box_url: 'https://app.vagrantup.com/ubuntu/boxes/bionic64'
   #   bootstrap: 'bootstrap.yml'
   #   type: "linux"
-  #   state: "present"
+  #   state: "absent"
   #   python3: true
 
  # Templated data, as this format is working well: 
