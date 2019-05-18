@@ -5,6 +5,8 @@ ssh_user: "user"
 ssh_home: "/home/user/"
 ssh_config: "~/.ssh/config"
 projects_root: "~/projects/"
+ssh_pub: "~/.ssh/id_rsa.pub"
+ssh_priv: "~/.ssh/id_rsa"
 host_path: "~/projects/inventory/"
 host_file: "~/projects/inventory/hosts"
 
@@ -69,19 +71,19 @@ host_list:
     type: "linux"
     state: "present"
 
-  - name: dev4
-    provider: virtualbox
-    group: eve
-    ip: "1.1.1.13"
-    vm_name: dev4
-    mem: 512
-    cpus: 2
-    box: 'ubuntu/bionic64'
-    box_url: 'https://app.vagrantup.com/ubuntu/boxes/bionic64'
-    bootstrap: 'bootstrap.yml'
-    type: "linux"
-    state: "present"
-    python3: true
+  # - name: dev4
+  #   provider: virtualbox
+  #   group: eve
+  #   ip: "1.1.1.13"
+  #   vm_name: dev4
+  #   mem: 512
+  #   cpus: 2
+  #   box: 'ubuntu/bionic64'
+  #   box_url: 'https://app.vagrantup.com/ubuntu/boxes/bionic64'
+  #   bootstrap: 'bootstrap.yml'
+  #   type: "linux"
+  #   state: "absent"
+  #   python3: true
 
  # Templated data, as this format is working well: 
   # - name: xxx

@@ -31,12 +31,6 @@
         state: present
       when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
 
-    - name: Set authorized key from file
-      authorized_key:
-        user: "{{ssh_user}}"
-        state: present
-        key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
-
     - name: Add user to sudoers
       lineinfile: dest=/etc/sudoers
                   regexp="{{ssh_user}}"
@@ -76,14 +70,14 @@
 
     - name: Copy over the ssh public key
       copy:
-        src: id_rsa.pub
+        src: "{{ssh_pub}}"
         dest: "{{ssh_home}}.ssh/id_rsa.pub"
         owner: "{{ssh_user}}"
         mode: 0600
 
     - name: Copy over the ssh private key
       copy:
-        src: id_rsa
+        src: "{{ssh_priv}}"
         dest: "{{ssh_home}}.ssh/id_rsa"
         owner: "{{ssh_user}}"
         mode: 0600
@@ -92,7 +86,7 @@
       authorized_key:
         user: "{{ssh_user}}"
         state: present
-        key: "{{ lookup('file', 'id_rsa.pub') }}"
+        key: "{{ lookup('file', '{{ssh_pub}}') }}"
 
   handlers:
     - name: restart_ssh

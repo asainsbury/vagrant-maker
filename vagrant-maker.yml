@@ -18,13 +18,41 @@
       tags:
         - host_path
 
-    - name: Check host inventory exist and create if not
+    - name: Check that the host file exists
+      stat:
+        path: "{{ host_file }}"
+      register: stat_result
+      tags: host_file
+
+    - name: Create the file, if it doesnt exist already
       file:
         path: "{{ host_file }}"
         state: touch
+      when: stat_result.stat.exists == False  
+      tags: host_file
+ 
+    # This bit is not working very well..
+    # If the file gets out of order, delete it and it will get generated again
+    # - name: add group to inventory file
+    #   lineinfile:
+    #     path: "{{host_file}}"
+    #     regexp: "{{item.group}}"
+    #     line: "[{{item.group}}]"
+    #     state: "{{item.state}}"
+    #     firstmatch: yes
+    #   with_items: "{{ host_list }}"
+    #   run_once: true
+    #   tags: group
 
-      tags:
-        - host_file
+    # - name: add host to inventory file
+    #   lineinfile:
+    #     path: "{{host_file}}"
+    #     regexp: "{{item.name}}"
+    #     line: "{{item.name}} ansible_ssh_host={{item.ip}}"
+    #     insertafter: "{{item.group}}"
+    #     state: "{{item.state}}"
+    #   with_items: "{{ host_list }}"
+    #   tags: inv
 
     - name: Add hosts for vagrant into sshconfg
       blockinfile:
@@ -44,8 +72,7 @@
       with_items:
         - "{{host_list}}"
 
-      tags:
-        - sshconfg
+      tags: sshconfg
   
 
     - name: Add the Vagrant Boxes
@@ -60,29 +87,8 @@
 
       when: update
 
-      tags:
-        - box_add
+      tags: box_add
 
 
-    - name: add group to inventory file
-      lineinfile:
-        path: "{{host_file}}"
-        regexp: "{{item.group}}"
-        line: "[{{item.group}}]"
-        state: "{{item.state}}"
-        firstmatch: yes
-      with_items: "{{ host_list }}"
-      tags:
-        - group
 
-    - name: add host to inventory file
-      lineinfile:
-        path: "{{host_file}}"
-        regexp: "{{item.name}}"
-        line: "{{item.name}} ansible_ssh_host={{item.ip}}"
-        insertafter: "{{item.group}}"
-        state: "{{item.state}}"
-      with_items: "{{ host_list }}"
-      tags:
-        - inv
 
