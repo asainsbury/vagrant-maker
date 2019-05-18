@@ -3,11 +3,7 @@
   gather_facts: false
 
   vars:
-    update: false
-
-# To Do
-# Add a destroy task, which cleans up all the config
-# and get rid of the "Status" section in the all.yml file
+    update: true
 
   tasks:      
     - name: Check inventory paths exist and create if not
@@ -31,28 +27,6 @@
       when: stat_result.stat.exists == False  
       tags: host_file
  
-    # This bit is not working very well..
-    # If the file gets out of order, delete it and it will get generated again
-    # - name: add group to inventory file
-    #   lineinfile:
-    #     path: "{{host_file}}"
-    #     regexp: "{{item.group}}"
-    #     line: "[{{item.group}}]"
-    #     state: "{{item.state}}"
-    #     firstmatch: yes
-    #   with_items: "{{ host_list }}"
-    #   run_once: true
-    #   tags: group
-
-    # - name: add host to inventory file
-    #   lineinfile:
-    #     path: "{{host_file}}"
-    #     regexp: "{{item.name}}"
-    #     line: "{{item.name}} ansible_ssh_host={{item.ip}}"
-    #     insertafter: "{{item.group}}"
-    #     state: "{{item.state}}"
-    #   with_items: "{{ host_list }}"
-    #   tags: inv
 
     - name: Add hosts for vagrant into sshconfg
       blockinfile:
@@ -77,16 +51,13 @@
 
     - name: Add the Vagrant Boxes
       shell: 'vagrant box add {{item}} --insecure --provider virtualbox'
-   
       register: result
 
       with_items:
         - "{{box_list}}"
 
       failed_when: "'A name is required' in result.stderr"
-
       when: update
-
       tags: box_add
 
 

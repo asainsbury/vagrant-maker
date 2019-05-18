@@ -23,7 +23,7 @@ Both tasks have a state of presence, so you can remove the config by simply chan
   gather_facts: false
 
   vars:
-    update: false
+    update: true
 
   tasks:      
     - name: Check inventory paths exist and create if not
@@ -34,15 +34,21 @@ Both tasks have a state of presence, so you can remove the config by simply chan
       tags:
         - host_path
 
-    - name: Check host inventory exist and create if not
+    - name: Check that the host file exists
+      stat:
+        path: "{{ host_file }}"
+      register: stat_result
+      tags: host_file
+
+    - name: Create the file, if it doesn't exist already
       file:
         path: "{{ host_file }}"
         state: touch
+      when: stat_result.stat.exists == False  
+      tags: host_file
+ 
 
-      tags:
-        - host_file
-
-    - name: Add hosts for vagrant into sshconfg
+    - name: Add hosts for vagrant into ssh config
       blockinfile:
         path: "{{ssh_config}}"
         marker: "# {mark} ANSIBLE MANAGED BLOCK {{ item.name }}"
@@ -60,51 +66,27 @@ Both tasks have a state of presence, so you can remove the config by simply chan
       with_items:
         - "{{host_list}}"
 
-      tags:
-        - sshconfg
+      tags: sshconfg
   
 
     - name: Add the Vagrant Boxes
       shell: 'vagrant box add {{item}} --insecure --provider virtualbox'
-   
       register: result
 
       with_items:
         - "{{box_list}}"
 
       failed_when: "'A name is required' in result.stderr"
-
       when: update
-
-      tags:
-        - box_add
+      tags: box_add
 
 
-    - name: add group to inventory file
-      lineinfile:
-        path: "{{host_file}}"
-        regexp: "{{item.group}}"
-        line: "[{{item.group}}]"
-        state: "{{item.state}}"
-        firstmatch: yes
-      with_items: "{{ host_list }}"
-      tags:
-        - group
 
-    - name: add host to inventory file
-      lineinfile:
-        path: "{{host_file}}"
-        regexp: "{{item.name}}"
-        line: "{{item.name}} ansible_ssh_host={{item.ip}}"
-        insertafter: "{{item.group}}"
-        state: "{{item.state}}"
-      with_items: "{{ host_list }}"
-      tags:
-        - inv
+
 
 ```
-# Bootstraping the linux hosts
-Post vagrant up, calls this playbook, which sets up the environment for simple ssh access. This have been tested on both Ubunt and Centos, as listed in the groupvars section.
+# Bootstrapping the Linux hosts
+Post vagrant up, calls this playbook, which sets up the environment for simple ssh access. This have been tested on both Ubuntu and Centos, as listed in the groupvars section.
 
 ```
 ---
@@ -112,7 +94,7 @@ Post vagrant up, calls this playbook, which sets up the environment for simple s
   gather_facts: yes
   become: true
   
-  # Vagrant provison runs this file, so you don't actually need an inventory
+  # Vagrant provision runs this file, so you don't actually need an inventory
   # it does that for you.
   # Basically we setup a bunch of environment stuff so we can ssh into the host
   # Using all the data from all.yml
@@ -127,7 +109,7 @@ Post vagrant up, calls this playbook, which sets up the environment for simple s
     - name: Create User
       user:
         name: "{{ssh_user}}"
-        password: Password@1
+        password: "{{ 'password' | password_hash('sha512') }}"
         shell: /bin/bash
         append: yes
         generate_ssh_key: yes
@@ -139,12 +121,6 @@ Post vagrant up, calls this playbook, which sets up the environment for simple s
         name: libselinux-python
         state: present
       when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
-
-    - name: Set authorized key from file
-      authorized_key:
-        user: "{{ssh_user}}"
-        state: present
-        key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
 
     - name: Add user to sudoers
       lineinfile: dest=/etc/sudoers
@@ -174,7 +150,7 @@ Post vagrant up, calls this playbook, which sets up the environment for simple s
 
     - name: Copy over the ssh config file
       copy:
-        src: ~/.ssh/config
+        src: "{{ssh_config}}"
         dest: /home/user/.ssh/config
         owner: "{{ssh_user}}"
         mode: 0600
@@ -182,15 +158,14 @@ Post vagrant up, calls this playbook, which sets up the environment for simple s
     # Dependencies: 
     # Make some dummy keys on one of the VM's 
     # and place them in the root of this play
-
-    - name: Copy over the ssh public key
+    - name: Copy over the dummy pub ssh keys to each node
       copy:
         src: id_rsa.pub
         dest: "{{ssh_home}}.ssh/id_rsa.pub"
         owner: "{{ssh_user}}"
         mode: 0600
 
-    - name: Copy over the ssh private key
+    - name: Copy over the dummy priv ssh keys to each node
       copy:
         src: id_rsa
         dest: "{{ssh_home}}.ssh/id_rsa"
@@ -203,6 +178,14 @@ Post vagrant up, calls this playbook, which sets up the environment for simple s
         state: present
         key: "{{ lookup('file', 'id_rsa.pub') }}"
 
+    - name: Set authorized key from file from the control machine
+      authorized_key:
+        user: "{{ssh_user}}"
+        state: present
+        key: "{{ lookup('file', '{{ssh_pub}}') }}"
+
+
+
   handlers:
     - name: restart_ssh
       systemd:
@@ -211,7 +194,7 @@ Post vagrant up, calls this playbook, which sets up the environment for simple s
 ```
 
 ## The Group Vars
-It all starts at the beggining, which is a group vars files with paths and all sorts of other stuff. Look at this file for all the variables.
+It all starts at the beginning, which is a group vars files with paths and all sorts of other stuff. Look at this file for all the variables.
 
 ### Host list
 This is the list we are  going to use to generate ssh config and hosts inventory, but also is used by the vagrant file to build the virtual machines.
@@ -291,7 +274,7 @@ Host dev3 *.test.local
 ```
 
 ### Hosts inventory
-And lines of config for the hosts inventory file:
+I decided to chop this bit out as it wasn't working as expected.
 
 ```
 [dev]
@@ -325,7 +308,7 @@ end
 Here I used (checkout references section) a function I found to generate the networking stuff
 
 ```
-# Define a nice function to sor out all the networking
+# Define a nice function to sort out all the networking
 # Gets called in the main section
 def network_options(host)
   options = {}
@@ -377,7 +360,7 @@ Then we start to set the parameters which get used to build the virtual machine
 ```
 
 ### Vagrant set memory and cpu's
-Here we set the amount of RAM and CPU's to allocate to the virtual maching
+Here we set the amount of RAM and CPU's to allocate to the virtual machine:
 ```
       node.vm.provider host['provider'] do |vb|
         vb.name = host['name']
@@ -388,7 +371,7 @@ Here we set the amount of RAM and CPU's to allocate to the virtual maching
  ```
  
  ### Cisco conditional loop
- As I work on both linux hosts and network devices, I put in a conditional statement to check the host type
+ As I work on both Linux hosts and network devices, I put in a conditional statement to check the host type
  
  ```
       if host['type'] == "cisco"
@@ -418,7 +401,7 @@ Here we set the amount of RAM and CPU's to allocate to the virtual maching
  ```
  
  ### Ansible provisioning
- Only do this if we are working on a linux host, as its going to fail on a network device:
+ Only do this if we are working on a Linux host, as its going to fail on a network device:
  
  ```
       # If we supplied a bootstrap variable in the data, then execute
