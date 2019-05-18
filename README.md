@@ -1,6 +1,28 @@
 # vagrant-maker
 Ansible playbook to create a Vagrantfile and modify your .ssh/config file and also generate your hosts inventory file, all based on a set of data in groupvars.
 
+- [vagrant-maker](#vagrant-maker)
+  * [Introduction](#introduction)
+- [The vagrant-maker playbook](#the-vagrant-maker-playbook)
+- [Bootstrapping the Linux hosts](#bootstrapping-the-linux-hosts)
+  * [The Group Vars](#the-group-vars)
+    + [Host list](#host-list)
+    + [SSH config](#ssh-config)
+    + [Hosts inventory](#hosts-inventory)
+  * [Vagrantfile](#vagrantfile)
+    + [Importing the yaml data structure:](#importing-the-yaml-data-structure-)
+    + [Networking function:](#networking-function-)
+    + [Vagrant host loop](#vagrant-host-loop)
+    + [Vagrant configure boxes](#vagrant-configure-boxes)
+    + [Vagrant set memory and cpu's](#vagrant-set-memory-and-cpu-s)
+    + [Cisco conditional loop](#cisco-conditional-loop)
+    + [Ansible provisioning](#ansible-provisioning)
+      - [And finally...](#and-finally)
+  * [References](#references)
+
+<small><i><a href='http://ecotrust-canada.github.io/markdown-toc/'>Table of contents generated with markdown-toc</a></i></small>
+
+
 ## Introduction
 This code is a way for me to streamline the building of Vagrant hosts, on my Mac.
 
