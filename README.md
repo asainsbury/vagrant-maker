@@ -1,6 +1,28 @@
 # vagrant-maker
 Ansible playbook to create a Vagrantfile and modify your .ssh/config file and also generate your hosts inventory file, all based on a set of data in groupvars.
 
+- [vagrant-maker](#vagrant-maker)
+  * [Introduction](#introduction)
+- [The vagrant-maker playbook](#the-vagrant-maker-playbook)
+- [Bootstrapping the Linux hosts](#bootstrapping-the-linux-hosts)
+  * [The Group Vars](#the-group-vars)
+    + [Host list](#host-list)
+    + [SSH config](#ssh-config)
+    + [Hosts inventory](#hosts-inventory)
+  * [Vagrantfile](#vagrantfile)
+    + [Importing the yaml data structure:](#importing-the-yaml-data-structure-)
+    + [Networking function:](#networking-function-)
+    + [Vagrant host loop](#vagrant-host-loop)
+    + [Vagrant configure boxes](#vagrant-configure-boxes)
+    + [Vagrant set memory and cpu's](#vagrant-set-memory-and-cpu-s)
+    + [Cisco conditional loop](#cisco-conditional-loop)
+    + [Ansible provisioning](#ansible-provisioning)
+      - [And finally...](#and-finally)
+  * [References](#references)
+
+<small><i><a href='http://ecotrust-canada.github.io/markdown-toc/'>Table of contents generated with markdown-toc</a></i></small>
+
+
 ## Introduction
 This code is a way for me to streamline the building of Vagrant hosts, on my Mac.
 
@@ -9,6 +31,11 @@ After lots of research (Google) I've managed to come up with a compact and bijou
 This allows you to be able to ssh into all the VM's and between all VM's for fast development.
 
 Run the playbook `ansible-playbook vagrant-maker.yml`
+
+<div align="right">
+    <b><a href="#top">↥ back to top</a></b>
+</div>
+<br/>
 
 # The vagrant-maker playbook 
 It was surprisingly simple to generate the files, and it uses just 2 modules 
@@ -79,12 +106,12 @@ Both tasks have a state of presence, so you can remove the config by simply chan
       failed_when: "'A name is required' in result.stderr"
       when: update
       tags: box_add
-
-
-
-
-
 ```
+<div align="right">
+    <b><a href="#top">↥ back to top</a></b>
+</div>
+<br/>
+
 # Bootstrapping the Linux hosts
 Post vagrant up, calls this playbook, which sets up the environment for simple ssh access. This have been tested on both Ubuntu and Centos, as listed in the groupvars section.
 
@@ -192,9 +219,18 @@ Post vagrant up, calls this playbook, which sets up the environment for simple s
         name: sshd
         state: restarted
 ```
+<div align="right">
+    <b><a href="#top">↥ back to top</a></b>
+</div>
+<br/>
 
 ## The Group Vars
 It all starts at the beginning, which is a group vars files with paths and all sorts of other stuff. Look at this file for all the variables.
+
+<div align="right">
+    <b><a href="#top">↥ back to top</a></b>
+</div>
+<br/>
 
 ### Host list
 This is the list we are  going to use to generate ssh config and hosts inventory, but also is used by the vagrant file to build the virtual machines.
@@ -241,6 +277,11 @@ host_list:
     state: "present"
 ```
 
+<div align="right">
+    <b><a href="#top">↥ back to top</a></b>
+</div>
+<br/>
+
 ### SSH config
 The playbook iterates over the list and generates blocks of text for the ssh config:
 
@@ -273,6 +314,11 @@ Host dev3 *.test.local
 # END ANSIBLE MANAGED BLOCK dev3
 ```
 
+<div align="right">
+    <b><a href="#top">↥ back to top</a></b>
+</div>
+<br/>
+
 ### Hosts inventory
 I decided to chop this bit out as it wasn't working as expected.
 
@@ -283,8 +329,18 @@ dev2 ansible_ssh_host=1.1.1.11
 dev3 ansible_ssh_host=1.1.1.12
 ```
 
+<div align="right">
+    <b><a href="#top">↥ back to top</a></b>
+</div>
+<br/>
+
 ## Vagrantfile
 This is where all the fun begins.
+
+<div align="right">
+    <b><a href="#top">↥ back to top</a></b>
+</div>
+<br/>
 
 ### Importing the yaml data structure:
 This is where we set the data for the vagrantfile to source from, and inside the code we have a conditional to check if the file exists or we exit:
@@ -303,6 +359,11 @@ else
 end
 
 ```
+
+<div align="right">
+    <b><a href="#top">↥ back to top</a></b>
+</div>
+<br/>
 
 ### Networking function:
 Here I used (checkout references section) a function I found to generate the networking stuff
@@ -336,6 +397,11 @@ def network_options(host)
 end
 ```
 
+<div align="right">
+    <b><a href="#top">↥ back to top</a></b>
+</div>
+<br/>
+
 ### Vagrant host loop
 At this point we can start a loop, to iterate over the data we set in the groupvars and build the box
 
@@ -345,6 +411,10 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     
     set_group = '/' + host['group']
 ```
+<div align="right">
+    <b><a href="#top">↥ back to top</a></b>
+</div>
+<br/>
 
 ### Vagrant configure boxes
 Then we start to set the parameters which get used to build the virtual machine
@@ -359,6 +429,11 @@ Then we start to set the parameters which get used to build the virtual machine
       node.vm.boot_timeout = 180
 ```
 
+<div align="right">
+    <b><a href="#top">↥ back to top</a></b>
+</div>
+<br/>
+
 ### Vagrant set memory and cpu's
 Here we set the amount of RAM and CPU's to allocate to the virtual machine:
 ```
@@ -369,7 +444,12 @@ Here we set the amount of RAM and CPU's to allocate to the virtual machine:
         vb.customize ['modifyvm', :id, '--groups', set_group]
       end
  ```
- 
+
+<div align="right">
+    <b><a href="#top">↥ back to top</a></b>
+</div>
+<br/>
+
  ### Cisco conditional loop
  As I work on both Linux hosts and network devices, I put in a conditional statement to check the host type
  
@@ -400,6 +480,11 @@ Here we set the amount of RAM and CPU's to allocate to the virtual machine:
       end
  ```
  
+ <div align="right">
+    <b><a href="#top">↥ back to top</a></b>
+</div>
+<br/>
+
  ### Ansible provisioning
  Only do this if we are working on a Linux host, as its going to fail on a network device:
  
@@ -418,6 +503,11 @@ Here we set the amount of RAM and CPU's to allocate to the virtual machine:
 end
 ```
 
+<div align="right">
+    <b><a href="#top">↥ back to top</a></b>
+</div>
+<br/>
+
 #### And finally...
 This set of instructions was build on my mac, and the VM's I tested with are the basic Ubuntu and Centos images. Hopefully there will be others out there who will be able to benefit from this work?
 
@@ -428,3 +518,8 @@ Thanks to these resources for helping me build out the best vagrant dev envrionm
 - http://bertvv.github.io/notes-to-self/2015/10/05/one-vagrantfile-to-rule-them-all/
 - http://hakunin.com/six-ansible-practices
 - https://stackoverflow.com/questions/16708917/how-do-i-include-variables-in-my-vagrantfile
+
+<div align="right">
+    <b><a href="#top">↥ back to top</a></b>
+</div>
+<br/>
